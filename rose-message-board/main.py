@@ -28,13 +28,6 @@ class MainHandler(webapp2.RequestHandler):
 	def get(self):
 		self.response.headers['Content-Type'] = 'text/plain'
 		self.response.headers.add_header("Access-Control-Allow-Origin", "*")
-		# Add some messages to the database for testing
-		msg1 = Message(google_plus_id = '108456725833219286408',
-						comment = 'This is a post by Dave Fisher')
-		msg2 = Message(google_plus_id = '106027280718489289045',
-						comment = 'This is a post by Kristy Fisher')
-		msg1.put()
-		msg2.put()
 		messageList =[]
 		messages = Message.query().order(-Message.created_date_time).fetch(10)		
 		for message in messages:
@@ -45,9 +38,11 @@ class MainHandler(webapp2.RequestHandler):
 	    return obj.isoformat() if hasattr(obj, 'isoformat') else obj
 
 	def post(self):
-		newMessage = Message(google_plus_id = self.request.get('google_plus_id'),
-								comment = self.request.get('comment'))
+		postBody = json.loads(self.request.body)
+		newMessage = Message(google_plus_id = postBody['google_plus_id'],
+										comment = postBody['comment'])
 		newMessage.put()
-		self.response.out.write('You added a comment.  Well done.')
+		self.response.headers['Content-Type'] = "text/plain"
+		self.response.out.write(json.dumps(newMessage.to_dict(), default=self.date_time_handler))
 
 app = webapp2.WSGIApplication([('/', MainHandler)], debug=True)
