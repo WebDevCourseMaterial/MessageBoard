@@ -15,7 +15,6 @@
 # limitations under the License.
 #
 import webapp2
-import datetime
 from google.appengine.ext import ndb
 import json
 
