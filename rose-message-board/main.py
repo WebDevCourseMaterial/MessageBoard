@@ -35,12 +35,11 @@ class MainHandler(webapp2.RequestHandler):
 		self.response.out.write(json.dumps(messageList, default=self.date_time_handler))
 
 	def date_time_handler(self, obj):
-	    return obj.isoformat() if hasattr(obj, 'isoformat') else obj
+		return obj.isoformat() if hasattr(obj, 'isoformat') else obj
 
 	def post(self):
 		postBody = json.loads(self.request.body)
-		newMessage = Message(google_plus_id = postBody['google_plus_id'],
-										comment = postBody['comment'])
+		newMessage = Message(google_plus_id = postBody['google_plus_id'], comment = postBody['comment'])
 		newMessage.put()
 		self.response.headers['Content-Type'] = "text/plain"
 		self.response.out.write(json.dumps(newMessage.to_dict(), default=self.date_time_handler))
