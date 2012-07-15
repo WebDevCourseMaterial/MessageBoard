@@ -3,7 +3,9 @@
 #
 # How do I...
 #   Get 10 results:  XMLHttpRequest GET request to rose-message-board.appspot.com
-#   Get 12 results:  XMLHttpRequest GET request to rose-message-board.appspot.com?maxResults=12
+#   Get 12 results:  XMLHttpRequest GET request to rose-message-board.appspot.com?limit=12
+#   Get 22 results:  XMLHttpRequest GET request to rose-message-board.appspot.com?limit=20&offset=0
+#       then XMLHttpRequest GET request to rose-message-board.appspot.com?limit=20&offset=20
 #   Create a new message: XMLHttpRequest POST request to rose-message-board.appspot.com
 #       with a POST body {"google_plus_id": "12345", "comment": "Hello Dave"}
 #   Edit a new message: XMLHttpRequest POST request to rose-message-board.appspot.com
@@ -16,6 +18,7 @@ from google.appengine.ext import ndb
 import datetime
 import json
 import webapp2
+import logging
 
 class Message(ndb.Model):
 	google_plus_id = ndb.StringProperty(required=True)
@@ -26,17 +29,26 @@ class MainHandler(webapp2.RequestHandler):
 	def get(self):
 		self.response.headers['Content-Type'] = 'text/plain'
 		self.response.headers.add_header("Access-Control-Allow-Origin", "*")
-		requested_results = 10
-		MAX_RESULTS = 50
-		if self.request.get('maxResults'):
+		requested_limit = 10
+		requested_offset = 0
+		MAX_LIMIT = 20
+		if self.request.get('limit'):
 			try:
-				requested_results = int(self.request.get('maxResults'))
-				if requested_results > MAX_RESULTS:
-					requested_results = MAX_RESULTS
+				requested_limit = int(self.request.get('limit'))
+				if requested_limit > MAX_LIMIT:
+					requested_limit = MAX_LIMIT
+				else:
+					logging.warning("Limit request beyond MAX_LIMIT")
 			except:
-				logging.warning("Error setting maxResults")	
+				logging.warning("Error setting limit")	
+		if self.request.get('offset'):
+			try:
+				requested_offset = int(self.request.get('offset'))
+			except:
+				logging.warning("Error setting offset")
 		messageList =[]
-		messages = Message.query().order(-Message.created_date_time).fetch(requested_results)		
+		messages = Message.query().order(-Message.created_date_time).fetch(
+				limit=requested_limit, offset=requested_offset)		
 		for message in messages:
 			messageDict = message.to_dict()
 			messageDict['message_id'] = message.key.id()
