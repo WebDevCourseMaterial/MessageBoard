@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Message Board</title>
+    <link rel="stylesheet" type="text/css" href="style/common.css">
+    <link rel="stylesheet" type="text/css" href="style/message_viewer.css">
+    <script type="text/javascript" src="../../closure/closure-library/closure/goog/base.js"></script>
+    <script type="text/javascript">
+      goog.require('goog.events');
+      goog.require('goog.events.EventTarget');
+      goog.require('goog.debug.Logger');
+      
+
+      goog.require('goog.debug.Console');
+      goog.require('goog.debug.Logger');
+      goog.require('goog.debug.LogManager');
+      goog.require('goog.dom');
+      goog.require('goog.events');
+    </script>
+    
+    <script type="text/javascript" src="js/message_viewer_controller.js"></script>
+    
+<!-- <script type="text/javascript" src="build/deps.js"></script>
+    <script type="text/javascript">
+      goog.require('messages.MessageViewerController');
+    </script>-->
+  </head>
+  <body>
+  
+  
+<ol>
+    <li class="message">
+      <div class="message-metadata">
+        <img src="https://lh5.googleusercontent.com/-vB9HMliwbIY/AAAAAAAAAAI/AAAAAAAAAAA/kVHRubd8QZM/photo.jpg?sz=80" width="80" height="80" alt="">
+        <h4>Dave Fisher</h4>
+        <span>February 28, 2010</span>
+      </div>
+        <blockquote>
+          <p>This comment was made by Dave.</p>
+        </blockquote>
+    </li>
+    <li class="message">
+        <div class="message-metadata">
+            <img src="https://lh3.googleusercontent.com/-jFEun7oX1eI/AAAAAAAAAAI/AAAAAAAAAAA/eHGj8k-SVgc/photo.jpg?sz=80" width="80" height="80" alt="">
+            <h4>Kristy Fisher</h4>
+            <span>March 1, 2010</span>
+      </div>
+        <blockquote>
+          <p>This comment was made by Kristy</p>
+        </blockquote>
+    </li>
+</ol>
+  
+    <script type="text/javascript">
+
+    goog.debug.LogManager.getRoot().setLevel(goog.debug.Logger.Level.INFO);
+    var logconsole = new goog.debug.Console();
+    logconsole.setCapturing(true);
+    
+      new messages.MessageViewerController(/** @type {!Element} */ (window.document.body));  
+    </script>
+  </body>
+</html>

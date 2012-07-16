@@ -1,0 +1,62 @@
+
+body {
+  background-color: #eee;
+  background-image: url('../images/noise.jpg');
+  margin: 0;
+  padding: 40px;
+  font-family: "Segoe UI", Segoe, Calibri, Arial, sans-serif;
+}
+ol {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+.message {
+    float: left; /* float containment */
+    width: 100%;
+    margin: 0 0 20px 0;
+}
+.message-metadata {
+    float: left;
+    width: 100px;
+    font-size: 84%;
+    text-align: right;
+    text-shadow: 1px 1px 0 hsla(0,0%,100%,.7);
+}
+.message-metadata img {
+    -moz-transform: rotate(-5deg);
+    -o-transform: rotate(-5deg);
+    -webkit-transform: rotate(-5deg) translateY(-4px);
+    transform: rotate(-5deg) translateY(-4px);
+    border-radius: 20px;
+    box-shadow: 2px 2px 10px 5px hsla(0,0%,0%,.5);
+}
+h4 {
+    margin: 0;
+    font-size: 100%;
+    font-weight: normal;
+    line-height: 1;
+}
+.message-metadata span {
+    font-size: 84%;
+    color: #666;
+}
+blockquote p {
+    margin: 0;
+    padding: 0 0 10px 0;
+}
+blockquote {
+    position: relative;
+    margin: 5px 0 0 112px;
+    padding: 10px 15px 5px 15px;
+    border-radius: 10px;
+    border-top: 1px solid #fff;
+    background-color: hsla(182,44%,76%,.5);
+    background-image: -moz-linear-gradient(hsla(0,0%,100%,.6), hsla(0,0%,100%,0) 30px);
+    background-image: -webkit-linear-gradient(hsla(0,0%,100%,.6), hsla(0,0%,100%,0) 30px);
+    background-image: -o-linear-gradient(hsla(0,0%,100%,.6), hsla(0,0%,100%,0) 30px);
+    background-image: -ms-linear-gradient(hsla(0,0%,100%,.6), hsla(0,0%,100%,0) 30px);
+    background-image: linear-gradient(hsla(0,0%,100%,.6), hsla(0,0%,100%,0) 30px);
+    box-shadow: 1px 1px 2px hsla(0,0%,0%,.3);
+    word-wrap: break-word;
+}
