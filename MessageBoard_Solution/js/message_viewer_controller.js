@@ -67,6 +67,9 @@ messages.MessageViewerController.prototype.init_ = function() {
   var quotes = goog.dom.getElementsByTagNameAndClass('blockquote');
   this.logger.info('Number of quotes = ' + quotes.length);
   for (var i = 0; i < quotes.length; i++) {
+    
+    
+    // Should still be in a paragraph
     quotes[i].innerHTML = 'hi';
   }
 };
