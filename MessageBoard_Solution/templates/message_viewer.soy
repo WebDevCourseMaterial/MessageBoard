@@ -1,0 +1,38 @@
+/*
+ * Builds up the html used within the Message Board viewer.
+ * Author: fisherds@gmail.com (Dave Fisher)
+ */
+
+{namespace messageboard.templates.messageviewer}
+
+/**
+ * Loads the viewer DOM elements.
+ * @param messages A list of messages to display.
+ */
+{template .messagesList}
+<ol>
+  {foreach $message in $messages}
+    {call .messageListItem data="$message" /}
+  {/foreach}
+</ol>
+{/template}
+
+
+/**
+ * Adds the DOM elements for the message list item.
+ * @param google_plus_id The author's Google+ id.
+ * @param display_name The author's name.
+ * @param image_url The author's image.
+ * @param comment The comment for this message
+ */
+{template .messageListItem}
+  <li class="{css message}">
+    <div class="{css author} gp-{$google_plus_id}">
+      <img src="{$image_url}" width="80" height="80" alt="author photo">
+      <h4>{$display_name}</h4>
+    </div>
+    <div class="{css comment}">
+      <p>{$comment}</p>
+    </div>
+  </li>
+{/template}

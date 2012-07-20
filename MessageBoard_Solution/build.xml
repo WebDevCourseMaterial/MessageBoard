@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<project name="Rose Message Board" default="build">
+<project name="Message Board" default="build">
 	
 <!-- Defining folder locations and other properties. -->
-  <property name="closure.dir" value="${basedir}/../../closure" />
+  <property name="closure.dir" value="${basedir}/../../../closure" />
   <!-- Required folder structure within the closure folder:
       closure/closure-compiler  (svn checkout of http://closure-compiler.googlecode.com/svn/trunk/)
       closure/closure-library   (svn checkout of http://closure-library.googlecode.com/svn/trunk/)
@@ -11,18 +11,17 @@
 
   <!-- Path to this build file from base.js (used by depswriter.py) -->
   <property name="fromBase.dir"
-    value="../../../../workspace/MessageBoard_Solution" />
+    value="../../../../gitrepos/MessageBoard/MessageBoard_Solution" />
 	
 	<!-- Set to false for optimized production compiling.
 	     Set to true for un-optimized whitespace only compiling for debugging work. -->
-	<property name="debug" value="false" />
+	<property name="debug" value="true" />
 	
 <!-- Targets -->
   <target name="clean"
   	  description="Deletes the contents of the build directory">
     <delete dir="${build.dir}" />
     <mkdir dir="${build.dir}"/>
-    <mkdir dir="${build.dir}/stylemap"/>
     <mkdir dir="${build.dir}/files/js"/>
     <mkdir dir="${build.dir}/files/style"/>
   </target>
@@ -30,14 +29,11 @@
   <target name="stylesheets"
     description="Generate a combined, minified css file.">
   	<generate-stylesheet
-        outputfile = '${build.dir}/files/style/moving_logo.css'
+        outputfile = '${build.dir}/files/style/message_board.css'
   		renamingmap = '${build.dir}/renaming_map.js'>
       <inputfilenames>
-      	<!--
         <arg value="style/common.css" />
-        <arg value="style/css3button.css" />
-        <arg value="style/moving_logo.css" />
-        -->
+        <arg value="style/message_viewer.css" />
       </inputfilenames>
   	</generate-stylesheet>
   </target>
@@ -47,7 +43,7 @@
     <generate-template>
       <inputfilenames>
       	<!-- Note, these files must be in a folder called templates. -->
-        <!--<arg value="moving_logo.soy" />-->
+        <arg value="message_viewer.soy" />
       </inputfilenames>
     </generate-template>
   </target>
@@ -65,7 +61,7 @@
   	  description="Copy non-js files into the build folder as necessary">
     <copy todir="${build.dir}/files">
       <fileset dir=".">
-        <include name="moving_logo.html" />
+        <include name="message_board.html" />
         <include name="images/**" />
       </fileset>
     </copy>
@@ -74,10 +70,10 @@
   <target name="compile" description="generates the compiled javascript">
     <closure-builder
       root='${basedir}/js/'
-      outputfile="${build.dir}/files/js/moving_logo.js"
+      outputfile="${build.dir}/files/js/message_board.js"
       compilationlevel="${closure.optimizations}" > <!-- Selects value based on debug property -->
       <namespaces>
-        <arg line='--namespace=movingr.Main' />
+        <arg line='--namespace=messageboard.Main' />
       </namespaces>
       <extraflags>
       	<!-- Optional.  This turns what would be warnings into errors for type safety. -->
@@ -143,6 +139,7 @@
         <arg line="${pretty_print_style_arg}" />
         <arg line='--output-file "@{outputfile}"' />
         <arg line='--output-renaming-map-format CLOSURE_COMPILED' />
+        <arg line='--allowed-non-standard-function translateY' />
         <arg line='--rename CLOSURE' />
   		<arg line='--output-renaming-map "@{renamingmap}"' />
   		<inputfilenames />
