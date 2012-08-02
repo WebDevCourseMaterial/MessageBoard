@@ -1,0 +1,29 @@
+/**
+ * Builds up the html used within the Message Board author post area.
+ * Author: fisherds@gmail.com (Dave Fisher)
+ */
+
+{namespace messageboard.templates.messagepost}
+
+/**
+ * Loads the post DOM elements.
+ */
+{template .postOverlay}
+  <div class="{css post-backdrop}">
+    <div class="{css post-controls}">
+      <img src="images/no_photo_gitcat.png" width="50" height="50" alt="author photo">
+      <input value="" label="make a new post here" id="post-input" x-webkit-speech>
+    </div>
+  </div>
+{/template}
+
+/**
+ * Loads the post DOM elements.
+ */
+{template .postOverlayNotSignedIn}
+  <div class="{css post-backdrop}">
+    <div class="{css post-controls}">
+      <div class="{css button}">Sign in to post</div>
+    </div>
+  </div>
+{/template}

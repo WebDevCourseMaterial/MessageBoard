@@ -52,20 +52,12 @@ goog.inherits(messageboard.MessageViewerController, goog.events.EventTarget);
 
 
 /**
- * API generated from https://code.google.com/apis/console
+ * Google API key generated from https://developers.google.com/console/
  * 
  *            CHANGE THIS TO YOUR OWN KEY!!!
  */
 messageboard.MessageViewerController.API_KEY =
     'AIzaSyC4hhfmlBAmxe269S-_2xXr8fUKFAF7qrI';
-
-
-/**
- * Logger for this class.
- * @type {goog.debug.Logger}
- */
-messageboard.MessageViewerController.prototype.logger =
-    goog.debug.Logger.getLogger('messageboard.MessageViewerController');
 
 
 /**
@@ -84,49 +76,11 @@ messageboard.MessageViewerController.UNKNOWN_PHOTO =
 
 
 /**
- * Colors used by the author post-it notes.
- * @type {Array.<string>} 
+ * Logger for this class.
+ * @type {goog.debug.Logger}
  */
-messageboard.MessageViewerController.AUTHOR_COLORS = [
-    'green-darker-top',
-    'yellow-darker-top',
-    'teal-darker-top',
-    'magenta-darker-top',
-    'orange-darker-top'];
-
-
-/**
- * Colors used by the comment post-it notes.
- * @type {Array.<string>} 
- */
-messageboard.MessageViewerController.COMMENT_COLORS = [
-    'green-darker-bottom',
-    'yellow-darker-bottom',
-    'teal-darker-bottom',
-    'magenta-darker-bottom',
-    'orange-darker-bottom'];
-
-
-/**
- * Angles used by the author post-it notes.
- * @type {Array.<string>} 
- */
-messageboard.MessageViewerController.AUTHOR_ANGLES = [
-    'author-ccw-5',
-    'author-ccw-2',
-    'author-cw-2',
-    'author-cw-5'];
-
-
-/**
- * Angles used by the comment post-it notes.
- * @type {Array.<string>} 
- */
-messageboard.MessageViewerController.COMMENT_ANGLES = [
-    'comment-ccw-1_5',
-    'comment-ccw-0_5',
-    'comment-cw-0_5',
-    'comment-cw-1_5'];
+messageboard.MessageViewerController.prototype.logger =
+    goog.debug.Logger.getLogger('messageboard.MessageViewerController');
 
 
 /**
@@ -135,7 +89,8 @@ messageboard.MessageViewerController.COMMENT_ANGLES = [
  */
 messageboard.MessageViewerController.prototype.init_ = function() {
   goog.net.XhrIo.send(
-      'http://rose-message-board.appspot.com?limit=12',
+      //'http://www.rose-message-board.com/api?limit=12',  // First round version
+      '/api?limit=12',
       goog.bind(this.handleMessagesResponse_, this));
 };
 
@@ -167,7 +122,7 @@ messageboard.GooglePlusApiResponse;
 
 /**
  * Handles the JSON reply from AppEngine with the list of messages.
- * @param {goog.events.BrowswerEvent} e Xhr event.
+ * @param {goog.events.BrowserEvent} e Xhr event.
  * @private
  */
 messageboard.MessageViewerController.prototype.handleMessagesResponse_ =
@@ -178,7 +133,8 @@ messageboard.MessageViewerController.prototype.handleMessagesResponse_ =
         xhr.getStatus());
     return;
   }
-  var messageResponse = xhr.getResponseJson();
+  var messageResponse = /** @type {messageboard.MessageResponse} */
+      (xhr.getResponseJson());
   if (messageResponse.hasOwnProperty('error')) {
     this.logger.warning('Error getting messageboard. ' +
         messageResponse['error']);
@@ -195,31 +151,9 @@ messageboard.MessageViewerController.prototype.handleMessagesResponse_ =
 messageboard.MessageViewerController.prototype.renderUiForMessageResponse_ =
     function(messageResponse) {
   var unknownIds = this.addKnownIds_(messageResponse);
+  var data = {messages: messageResponse['messages']};
   goog.soy.renderElement(this.container_,
-      messageboard.templates.messageviewer.messagesList, messageResponse);
-  
-  // Add randomized colors and angles.
-  goog.array.shuffle(messageboard.MessageViewerController.AUTHOR_ANGLES);
-  goog.array.shuffle(messageboard.MessageViewerController.AUTHOR_COLORS);
-  goog.array.shuffle(messageboard.MessageViewerController.COMMENT_ANGLES);
-  goog.array.shuffle(messageboard.MessageViewerController.COMMENT_COLORS);
-  var authors = goog.dom.getElementsByClass(goog.getCssName('author'));
-  goog.array.forEach(authors, goog.bind(function(authorEl, index) {
-    goog.dom.classes.add(authorEl,
-        goog.getCssName(messageboard.MessageViewerController.AUTHOR_ANGLES[
-          index % messageboard.MessageViewerController.AUTHOR_ANGLES.length]),
-        goog.getCssName(messageboard.MessageViewerController.AUTHOR_COLORS[
-          index % messageboard.MessageViewerController.AUTHOR_COLORS.length]));
-  }, this));
-  var comments = goog.dom.getElementsByClass(goog.getCssName('comment'));
-  goog.array.forEach(comments, goog.bind(function(commentEl, index) {
-    goog.dom.classes.add(commentEl,
-        goog.getCssName(messageboard.MessageViewerController.COMMENT_ANGLES[
-          index % messageboard.MessageViewerController.COMMENT_ANGLES.length]),
-        goog.getCssName(messageboard.MessageViewerController.COMMENT_COLORS[
-          index % messageboard.MessageViewerController.COMMENT_COLORS.length]));
-  }, this));
-
+      messageboard.templates.messageviewer.messagesList, data);
   // Use the Google+ API to figure out the missing authors.
   for (var i = 0; i < unknownIds.length; i++) {
     this.getGooglePlusId_(unknownIds[i]);
@@ -246,6 +180,9 @@ messageboard.MessageViewerController.prototype.addKnownIds_ =
           messageboard.MessageViewerController.UNKNOWN_PHOTO;
       goog.array.insert(unknownIds, message['google_plus_id']);
     }
+    var gPlusLen = message['google_plus_id'].length;
+    message['first_digit'] = message['google_plus_id'].substring(3, 4);
+    message['last_digit'] = message['google_plus_id'].substring(gPlusLen-1, gPlusLen);
   }
   return unknownIds;
 };
@@ -274,7 +211,7 @@ messageboard.MessageViewerController.prototype.getGooglePlusId_ =
 
 /**
  * Add the response to the page and to local storage.
- * @param {goog.events.BrowswerEvent} e Xhr event.
+ * @param {goog.events.BrowserEvent} e Xhr event.
  * @private
  */
 messageboard.MessageViewerController.prototype.handleGooglePlusApiResponse_ =
@@ -333,10 +270,9 @@ messageboard.MessageViewerController.prototype.storeGooglePlusInfo_ =
  * then the display_name and image_url are added to the message.  If the id is
  * not found then return false and add no fields.
  *
- * @param {string} gPlusId Google+ id to retrieve from local storage.
  * @param {messageboard.Message} message Individual message from the list
  *     retrieved from AppEngine.
- * @return {Boolean} True if the Google+ info was available in local storage.
+ * @return {boolean} True if the Google+ info was available in local storage.
  *     False if the Google+ id was not found in local storage.
  */
 messageboard.MessageViewerController.prototype.addStoredGooglePlusInfo_ =

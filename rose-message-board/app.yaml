@@ -9,8 +9,21 @@ handlers:
   static_files: favicon.ico
   upload: favicon\.ico
 
-- url: .*
+- url: /api.*
   script: main.app
+
+- url: /js
+  static_dir: js
+
+- url: /style
+  static_dir: style
+
+- url: /images
+  static_dir: images
+
+- url: .*
+  static_files: message_board.html
+  upload: message_board\.html  
 
 libraries:
 - name: webapp2

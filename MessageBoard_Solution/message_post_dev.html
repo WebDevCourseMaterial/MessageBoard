@@ -4,7 +4,8 @@
     <meta charset="utf-8">
     <title>Message Board</title>
     <link rel="stylesheet" type="text/css" href="style/common.css">
-    <link rel="stylesheet" type="text/css" href="style/message_viewer.css">
+    <link rel="stylesheet" type="text/css" href="style/css3button.css">
+    <link rel="stylesheet" type="text/css" href="style/message_post.css">
     <script type="text/javascript" src="../../../closure/closure-library/closure/goog/base.js"></script>
     <script type="text/javascript" src="build/deps.js"></script>
     <script type="text/javascript">
@@ -12,18 +13,18 @@
       goog.require('goog.debug.Logger');
       goog.require('goog.debug.LogManager');
       goog.require('goog.dom');
-      goog.require('messageboard.MessageViewerController');
+      goog.require('messageboard.MessagePostController');
     </script>
   </head>
   <body>
-    <div id="message-viewer"></div>  
+    <div id="message-post"></div>  
     <script type="text/javascript">
       goog.debug.LogManager.getRoot().setLevel(goog.debug.Logger.Level.INFO);
       var logconsole = new goog.debug.Console();
       logconsole.setCapturing(true);
     
-      new messageboard.MessageViewerController(/** @type {!Element} */ (
-          goog.dom.getElement('message-viewer')));  
+      new messageboard.MessagePostController(/** @type {!Element} */ (
+          goog.dom.getElement('message-post')));  
     </script>
   </body>
 </html>

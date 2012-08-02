@@ -27,7 +27,15 @@ class Message(ndb.Model):
 
 class MainHandler(webapp2.RequestHandler):
 	def get(self):
-		self.response.headers['Content-Type'] = 'text/plain'
+		self.response.headers['Content-Type'] = 'application/json'
+		if self.request.path:
+			try:
+				message_id_request = int(self.request.path)
+				existingMessage = Message.get_by_id(message_id_request)
+				response = {'message': existingMessage.to_dict(), 'status': 'success'}
+				return
+			except:
+				logging.warning('Failed attempt to retrieve an individual message')
 		self.response.headers.add_header("Access-Control-Allow-Origin", "*")
 		requested_limit = 10
 		requested_offset = 0
@@ -61,8 +69,8 @@ class MainHandler(webapp2.RequestHandler):
 			return obj.isoformat()
 		return obj
 
-	def post(self):	
-		self.response.headers['Content-Type'] = "text/plain"
+	def post(self):		
+		self.response.headers['Content-Type'] = 'application/json'
 		postBody = json.loads(self.request.body)
 		if 'message_id' in postBody:
 			existingMessage = Message.get_by_id(postBody['message_id'])
@@ -95,7 +103,7 @@ class MainHandler(webapp2.RequestHandler):
 					newMessage = Message(google_plus_id = postBody['google_plus_id'],
 						comment = postBody['comment'])
 					newMessage.put()
-					response = {'messages': newMessage.to_dict(), 'status': 'created'}
+					response = {'message': newMessage.to_dict(), 'status': 'created'}
 					self.response.out.write(json.dumps(response, default=self.date_time_handler))
 				except:
 					response = {'error': 'unable to create message with these values'}
@@ -104,4 +112,4 @@ class MainHandler(webapp2.RequestHandler):
 				response = {'error': 'missing required google_plus_id or comment field'}
 				self.response.out.write(json.dumps(response))
 
-app = webapp2.WSGIApplication([('/', MainHandler)], debug=True)
+app = webapp2.WSGIApplication([('/api.*', MainHandler)], debug=True)
