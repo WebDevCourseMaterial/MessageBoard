@@ -23,21 +23,21 @@
     <delete dir="${build.dir}" />
     <mkdir dir="${build.dir}"/>
     <mkdir dir="${build.dir}/files/js"/>
-    <mkdir dir="${build.dir}/files/style"/>
+    <mkdir dir="${build.dir}/files/stylesheets"/>
   </target>
 
   <target name="stylesheets"
     description="Generate a combined, minified css file.">
   	<generate-stylesheet
-        outputfile = '${build.dir}/files/style/message_board.css'
+        outputfile = '${build.dir}/files/stylesheets/message_board.css'
   		renamingmap = '${build.dir}/renaming_map.js'>
       <inputfilenames>
-        <arg value="style/common.css" />
-        <arg value="style/message_board.css" />
-        <arg value="style/message_viewer.css" />
-        <arg value="style/message_post.css" />
-        <arg value="style/css3button.css" />
-        <arg value="style/colors_and_angles.css" />
+        <arg value="stylesheets/common.css" />
+        <arg value="stylesheets/message_board.css" />
+        <arg value="stylesheets/message_viewer.css" />
+        <arg value="stylesheets/message_post.css" />
+        <arg value="stylesheets/css3button.css" />
+        <arg value="stylesheets/colors_and_angles.css" />
       </inputfilenames>
   	  <extraflags>
         <arg line='--allow-unrecognized-functions' />
@@ -132,8 +132,8 @@
     </copy>
     <copy tofile="../rose-message-board/js/message_board.js"
       file="${build.dir}/files/js/message_board.js" />
-    <copy tofile="../rose-message-board/style/message_board.css"
-      file="${build.dir}/files/style/message_board.css" />
+    <copy tofile="../rose-message-board/stylesheets/message_board.css"
+      file="${build.dir}/files/stylesheets/message_board.css" />
   </target>
 
   <target name="build" depends="clean, stylesheets, templates, gen_js_deps, replicate, compile, appengine-replicate" />

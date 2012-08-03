@@ -11,7 +11,6 @@
  */
 
 goog.provide('messageboard.OAuthIdentifier');
-goog.provide('messageboard.OAuthIdentifier.OAuthCompleteEvent');
 goog.provide('messageboard.OAuthIdentifier.GooglePlusIdSuccessEvent');
 goog.provide('messageboard.OAuthIdentifier.OAuthResult');
 
@@ -36,9 +35,33 @@ messageboard.OAuthIdentifier = function() {
   /**
    * OAuth token from the gapi client.
    * @type {string}
-   * @private
    */
-  this.oauthToken_ = '';
+  this.oauthToken = '';
+  
+  /**
+   * Google+ id of the end user.
+   * @type {string}
+   */
+  this.gPlusId = '';
+  
+  /**
+   * Google+ display name of the end user.
+   * @type {string}
+   */
+  this.gPlusDisplayName = '';
+  
+  /**
+   * Google+ thumbnail url of the end user.
+   * @type {string}
+   */
+  this.gPlusThumbnail = '';
+  
+  /**
+   * Refresh token that will be used to get a new OAuth token when the original
+   * OAuth token expires (after 1 hour).
+   * @type {string}
+   */
+  this.refreshToken_ = '';
   
   /**
    * Timer that will refresh the OAuth token just before it expires.  Typically
@@ -51,6 +74,7 @@ messageboard.OAuthIdentifier = function() {
   this.init_();
 };
 goog.inherits(messageboard.OAuthIdentifier, goog.events.EventTarget);
+goog.addSingletonGetter(messageboard.OAuthIdentifier);
 
 
 /**
@@ -58,48 +82,12 @@ goog.inherits(messageboard.OAuthIdentifier, goog.events.EventTarget);
  * @enum {string}
  */
 messageboard.OAuthIdentifier.EventType = {
-    OAUTH_INCOMPLETE: goog.events.getUniqueId('oauth-incomplete'),
-    OAUTH_COMPLETE: goog.events.getUniqueId('oauth-complete'),
-    GOOGLE_PLUS_ID_ERROR: goog.events.getUniqueId('google-plus-id-error'),
-    GOOGLE_PLUS_ID_SUCCESS: goog.events.getUniqueId('google-plus-id-success')
+  OAUTH_INCOMPLETE: goog.events.getUniqueId('oauth-incomplete'),
+  OAUTH_COMPLETE: goog.events.getUniqueId('oauth-complete'),
+  OAUTH_REFRESHED: goog.events.getUniqueId('oauth-refreshed'),
+  GOOGLE_PLUS_ID_ERROR: goog.events.getUniqueId('google-plus-id-error'),
+  GOOGLE_PLUS_ID_SUCCESS: goog.events.getUniqueId('google-plus-id-success')
 };
-
-
-/**
- * @typedef {{
- *   'access_token': string,
- *   'token_type': string,
- *   'expires_in': number,
- *   'id_token: string,
- *   'refresh_token': string
- * }}
- */
-messageboard.OAuthResult;
-
-
-
-/**
- * Event fired upon successful OAuth completion.
- *
- * @param {messageboard.OAuthIdentifier} oauthIdentifier Object throwing event.
- * @param {messageboard.OAuthIdentifier.OAuthResult} oauthResult The result
- *     from the gapi client which contains the OAuth token.
- * @constructor
- * @extends {goog.events.Event}
- */
-messageboard.OAuthIdentifier.OAuthCompleteEvent =
-    function(oauthIdentifier, oauthResult) {
-  goog.base(this, messageboard.OAuthIdentifier.EventType.OAUTH_COMPLETE,
-      oauthIdentifier);
-  /**
-   * A successful OAuth result from the gapi client.
-   * @type {messageboard.OAuthIdentifier.OAuthResult}
-   */
-  this.oauthResult = null;
-};
-goog.inherits(messageboard.OAuthIdentifier.OAuthCompleteEvent,
-              goog.events.Event);
-
 
 
 
@@ -213,13 +201,6 @@ messageboard.OAuthIdentifier.prototype.init_ = function() {
       this.authorizeBackground();
     }, oauthInstance), 1);  
   };
-    
-//    window.console.log('Added the script.  Loading auth and attempting a background authorize.');
-//    window.setTimeout(goog.bind(function() {
-//      window['gapi']['load']('auth', goog.bind(function() {
-//        window.setTimeout(this.authorizeBackground, 1000);    
-//      }, this));
-//    }, this), 1000);
 };
 
 
@@ -258,22 +239,34 @@ messageboard.OAuthIdentifier.prototype.authorizePopUp = function() {
 
 
 /**
+ * @typedef {{
+ *   'access_token': string,
+ *   'token_type': string,
+ *   'expires_in': number,
+ *   'id_token: string,
+ *   'refresh_token': string
+ * }}
+ */
+messageboard.OAuthIdentifier.OAuthResult;
+
+
+/**
  * Callback function to process the authorize response from the gapi authorize
  * call.
  *
- * @param {messageboard.OAuthResult} authResult Response from gapi following
- *     an oauth attempt.  Will include an error field if it didn't work. 
+ * @param {messageboard.OAuthIdentifier.OAuthResult} authResult Response from
+ *     gapi following an oauth attempt. 
  * @private
  */
 messageboard.OAuthIdentifier.prototype.handleAuthResult_ = function(authResult) {
   this.logger.info('Received a OAuth result from gapi.  Did it work? . . .');
   if (authResult && !authResult['error']) {
    this.logger.info('OAuth complete!  The token has landed!');
-   this.oauth_token = authResult['access_token'];
-   this.schedule_timer(authResult['expires_in']);
+   this.oauthToken = authResult['access_token'];
+   this.refreshToken_ = authResult['refresh_token'];
+   this.scheduleOAuthRefreshTimer_(authResult['expires_in']);
    this.makeAuthenticatedIdCall();
-   this.dispatchEvent(new messageboard.OAuthIdentifier.OAuthCompleteEvent(
-       this, authResult));
+   this.dispatchEvent(messageboard.OAuthIdentifier.EventType.OAUTH_COMPLETE);
   } else {
     this.logger.info('Not authorized yet. Wait for user to click on the ' +
         'authenticate button to trigger the popup.');
@@ -286,8 +279,8 @@ messageboard.OAuthIdentifier.prototype.handleAuthResult_ = function(authResult) 
  * Make an authenticated Google+ API call to get the end user identity. 
  */
 messageboard.OAuthIdentifier.prototype.makeAuthenticatedIdCall = function() {
-  if (goog.string.isEmpty(this.oauthToken_)) {
-    this.oauthToken_ = goog.global['gapi']['auth']['getToken'](); 
+  if (goog.string.isEmpty(this.oauthToken)) {
+    this.oauthToken = goog.global['gapi']['auth']['getToken'](); 
   }
   //var request = 'https://www.googleapis.com/plus/v1/people/me?key=' + messageboard.OAuthIdentifier.API_KEY;
   var requestUri = new goog.Uri(messageboard.OAuthIdentifier.GOOGLE_PLUS_PEOPLE_REQUEST);
@@ -301,7 +294,7 @@ messageboard.OAuthIdentifier.prototype.makeAuthenticatedIdCall = function() {
       goog.bind(this.handleAuthorizedGooglePlusResponse_, this),
       'GET',
       null,
-      {'Authorization': 'Bearer ' + oauthToken['access_token']});
+      {'Authorization': 'Bearer ' + this.oauthToken['access_token']});
 };
 
 
@@ -328,12 +321,54 @@ messageboard.OAuthIdentifier.prototype.handleAuthorizedGooglePlusResponse_ =
         messageboard.OAuthIdentifier.EventType.GOOGLE_PLUS_ID_ERROR);
     return;
   }
-  var gPlusId = apiResponse['id'];
-  var gPlusDisplayName = apiResponse['displayName'];
-  var gPlusThumbnail = apiResponse['image']['url'];
-  this.logger.info('gPlusId = ' + gPlusId);
-  this.logger.info('gPlusDisplayName = ' + gPlusDisplayName);
-  this.logger.info('gPlusThumbnail = ' + gPlusThumbnail);
+  this.gPlusId = apiResponse['id'];
+  this.gPlusDisplayName = apiResponse['displayName'];
+  this.gPlusThumbnail = apiResponse['image']['url'];
+  this.logger.info('gPlusId = ' + this.gPlusId);
+  this.logger.info('gPlusDisplayName = ' + this.gPlusDisplayName);
+  this.logger.info('gPlusThumbnail = ' + this.gPlusThumbnail);
   this.dispatchEvent(new messageboard.OAuthIdentifier.GooglePlusIdSuccessEvent(
-      oauthIdentifier, gPlusId, gPlusDisplayName, gPlusThumbnail));
+      this, this.gPlusId, this.gPlusDisplayName, this.gPlusThumbnail));
+};
+
+
+/**
+ * Schedules a timer to refresh the OAuth token when it expires.
+ *
+ * @param {number} expiresIn_seconds Time until token expires in seconds.
+ * @private
+ */
+messageboard.OAuthIdentifier.prototype.scheduleOAuthRefreshTimer_ =
+    function(expiresIn_seconds) {
+  this.cancelOAuthRefreshTimer_();
+  this.tokenExpirationTimer_ = new goog.async.Delay(
+      goog.bind(this.handleOAuthRefreshTimeout_, this),
+      expiresIn_seconds * 1000);
+  this.tokenExpirationTimer_.start();
+};
+
+
+/**
+ * Cancels the OAuth refresh timer.
+ * @private
+ */
+messageboard.OAuthIdentifier.prototype.cancelOAuthRefreshTimer_ = function() {
+  if (this.tokenExpirationTimer_) {
+    this.tokenExpirationTimer_.stop();
+    goog.dispose(this.tokenExpirationTimer_);
+    this.tokenExpirationTimer_ = null;
+  }
+};
+
+/**
+ * Handles the OAuth refresh timeout to get a new fresh OAuth token.
+ *
+ * @private
+ */
+messageboard.OAuthIdentifier.prototype.handleOAuthRefreshTimeout_ = function() {
+  this.logger.info('Time to update the OAuth token.');
+  
+  // TODO: Implement refreshing the OAuth token.
+  // Pretend like it got refreshed for now.
+  this.dispatchEvent(messageboard.OAuthIdentifier.EventType.OAUTH_REFRESHED);
 };

@@ -50,7 +50,7 @@ messageboard.MessagePostController = function(container) {
    * @type {messageboard.OAuthIdentifier}
    * @private
    */
-  this.oauthHelper_ = webdev.OAuthHelper.getInstance();
+  this.oauthHelper_ = messageboard.OAuthIdentifier.getInstance();
   
   
   
