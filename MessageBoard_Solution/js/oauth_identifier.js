@@ -179,7 +179,11 @@ messageboard.OAuthIdentifier.prototype.logger =
 /**
  * Initialize by adding the script and callback function.
  */
-messageboard.OAuthIdentifier.prototype.init_ = function() {  
+messageboard.OAuthIdentifier.prototype.init_ = function() {
+  if (goog.dom.getElement('google-api-script')) {
+    this.logger.severe('OAuthIdentifier loaded twice');
+    return;
+  }
   // Add the Google API client script to the DOM.
   var clientScript = goog.dom.createDom(
       'script',
@@ -196,10 +200,10 @@ messageboard.OAuthIdentifier.prototype.init_ = function() {
   // This function has been added to the global object (ie window) so that it
   // can easily be used in a JSONP callback by Google's OAuth script.
   goog.global['init'] = function() {
-    this.logger.info('Init called.  Attempt to background authorize.');
     new goog.async.Delay(goog.bind(function() {
+      this.logger.info('Init called.  Attempt to background authorize.');
       this.authorizeBackground();
-    }, oauthInstance), 1);  
+    }, oauthInstance), 1).start();  
   };
 };
 
@@ -261,12 +265,12 @@ messageboard.OAuthIdentifier.OAuthResult;
 messageboard.OAuthIdentifier.prototype.handleAuthResult_ = function(authResult) {
   this.logger.info('Received a OAuth result from gapi.  Did it work? . . .');
   if (authResult && !authResult['error']) {
-   this.logger.info('OAuth complete!  The token has landed!');
-   this.oauthToken = authResult['access_token'];
-   this.refreshToken_ = authResult['refresh_token'];
-   this.scheduleOAuthRefreshTimer_(authResult['expires_in']);
-   this.makeAuthenticatedIdCall();
-   this.dispatchEvent(messageboard.OAuthIdentifier.EventType.OAUTH_COMPLETE);
+    this.logger.info('OAuth complete!  The token has landed!');
+    this.oauthToken = authResult['access_token'];
+    this.refreshToken_ = authResult['refresh_token'];
+    this.scheduleOAuthRefreshTimer_(authResult['expires_in']);
+    this.makeAuthenticatedIdCall();
+    this.dispatchEvent(messageboard.OAuthIdentifier.EventType.OAUTH_COMPLETE);
   } else {
     this.logger.info('Not authorized yet. Wait for user to click on the ' +
         'authenticate button to trigger the popup.');
@@ -281,14 +285,14 @@ messageboard.OAuthIdentifier.prototype.handleAuthResult_ = function(authResult) 
 messageboard.OAuthIdentifier.prototype.makeAuthenticatedIdCall = function() {
   if (goog.string.isEmpty(this.oauthToken)) {
     this.oauthToken = goog.global['gapi']['auth']['getToken'](); 
+    if (!this.oauthToken) {
+      return '';
+    }
   }
-  //var request = 'https://www.googleapis.com/plus/v1/people/me?key=' + messageboard.OAuthIdentifier.API_KEY;
   var requestUri = new goog.Uri(messageboard.OAuthIdentifier.GOOGLE_PLUS_PEOPLE_REQUEST);
+  requestUri.setParameterValue('key', messageboard.OAuthIdentifier.API_KEY);
   // Limit the response fields to only the data we want (optional).
   requestUri.setParameterValue('fields', 'displayName,id,image');
-  requestUri.setParameterValue('key', messageboard.OAuthIdentifier.API_KEY);
-  //https://www.googleapis.com/plus/v1/people/me?fields=displayName%2Cid%2Cimage&key={YOUR_API_KEY}
-  this.logger.info('Making request ' + requestUri.toString());
   goog.net.XhrIo.send(
       requestUri.toString(),
       goog.bind(this.handleAuthorizedGooglePlusResponse_, this),
