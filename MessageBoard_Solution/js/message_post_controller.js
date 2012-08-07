@@ -26,10 +26,11 @@ goog.require('messageboard.templates.messagepost');
  * Controller used author messages sent to the rose-message-board.
  *
  * @param {!Element} container The element for this controller's content.
+ * @param {messageboard.OAuthIdentifier} oauthIdentifier The element for this controller's content.
  * @constructor
  * @extends {goog.events.EventTarget}
  */
-messageboard.MessagePostController = function(container) {
+messageboard.MessagePostController = function(container, oauthIdentifier) {
   goog.base(this);
   
   /**
@@ -46,13 +47,23 @@ messageboard.MessagePostController = function(container) {
   this.keyHandler_ = null;
 
   /**
+   * @type {goog.ui.Control}
+   * @private
+   */
+  this.authButtonControl_ = null;
+
+  /**
    * 
    * @type {messageboard.OAuthIdentifier}
    * @private
    */
-  this.oauthHelper_ = messageboard.OAuthIdentifier.getInstance();
+  this.oauthIdentifier_ = oauthIdentifier;
   
-  
+  /**
+   * Google+ id of the end user.
+   * @private 
+   */
+  this.gPlusId_ = '';
   
   /**
    * Holds events that should only be removed when the controller is disposed.
@@ -67,62 +78,12 @@ messageboard.MessagePostController = function(container) {
 goog.inherits(messageboard.MessagePostController, goog.events.EventTarget);
 
 
-messageboard.MessagePostController.prototype.init_ = function() {
-//  goog.soy.renderElement(this.container_,
-//      messageboard.templates.messagepost.postOverlay);
-
-
-  goog.soy.renderElement(this.container_,
-      messageboard.templates.messagepost.postOverlayNotSignedIn);
-  
-  
-
-  var buttonControl = new goog.ui.CustomButton('',
-      goog.ui.Css3ButtonRenderer.getInstance());
-  buttonControl.setSupportedState(goog.ui.Component.State.FOCUSED, false);
-  buttonControl.setSupportedState(goog.ui.Component.State.DISABLED, false);
-  buttonControl.decorate(goog.dom.getElementByClass(goog.getCssName('button')));
-  this.eventHandler_.listen(buttonControl, goog.ui.Component.EventType.ACTION,
-      this.buttonClick_);
-
-  
-  
-  
-  // TODO make a button and call
-  
-  
-  
-/*
-  // Add the Google API client script.
-  var clientScript = goog.dom.createDom('script');
-  clientScript.type = 'text/javascript';
-  clientScript.async = true;
-//  var scriptSrcUri = new goog.Uri('https://apis.google.com/js/client.js');
-//  scriptSrcUri.setParameterValues('onload',
-//      'messageboard.MessagePostController.handleClientLoad');
-  
-  var scriptSrcUri = new goog.Uri('https://apis.google.com/js/auth.js');
-  scriptSrcUri.setParameterValues('onload',
-      'messageboard.MessagePostController.handleClientLoad');
-
-    
-  clientScript.src = scriptSrcUri.toString();
-  var firstScript = goog.dom.getElementsByTagNameAndClass('script')[0];
-  goog.dom.insertSiblingBefore(clientScript, firstScript);
-  */
-
-  
-  this.keyHandler_ = new goog.events.KeyHandler(
-      goog.dom.getElement('post-input'));
-  this.eventHandler_.listen(this.keyHandler_,
-      goog.events.KeyHandler.EventType.KEY, this.onKeyEvent_);
-};
-
-
-messageboard.MessagePostController.prototype.buttonClick_ = function(e) {
-  this.logger.info('You clicked the button');
-  this.oauthHelper_.authorizePopUp();
-  
+/**
+ * Events that can be fired by instances of this class.
+ * @enum {string}
+ */
+messageboard.MessagePostController.EventType = {
+  NEW_MESSAGE_POSTED: goog.events.getUniqueId('new-message')
 };
 
 
@@ -132,6 +93,97 @@ messageboard.MessagePostController.prototype.buttonClick_ = function(e) {
  */
 messageboard.MessagePostController.prototype.logger =
     goog.debug.Logger.getLogger('messageboard.MessagePostController');
+
+
+/**
+ * Initialize the post controller.  Before adding UI elements check the OAuth
+ * state.
+ */
+messageboard.MessagePostController.prototype.init_ = function() {
+  // Add listeners to the oauthIdentifier then initialize it.
+  this.eventHandler_.listen(this.oauthIdentifier_,
+      messageboard.OAuthIdentifier.EventType.OAUTH_INCOMPLETE,
+      this.hangleOAuthIdFailure_);
+  this.eventHandler_.listen(this.oauthIdentifier_,
+      messageboard.OAuthIdentifier.EventType.GOOGLE_PLUS_ID_ERROR,
+      this.hangleOAuthIdFailure_);
+  this.eventHandler_.listen(this.oauthIdentifier_,
+      messageboard.OAuthIdentifier.EventType.GOOGLE_PLUS_ID_SUCCESS,
+      this.hangleOAuthIdSuccess_);  
+  // TODO: Create a timer that will fire if no events occur (ie a fallback).
+  //this.renderOAuthButton_();
+  this.oauthIdentifier_.initialize();
+};
+
+
+/**
+ * Callback for the OAuth identifier that puts up a button on the screen to do
+ * oauth via the popup window.
+ *
+ * @param {goog.events.Event} e Event from oauthIdentifier with an event type.
+ */
+messageboard.MessagePostController.prototype.hangleOAuthIdFailure_ =
+    function(e) {
+  this.logger.info('OAuth not complete.  Display the auth button. ' + 
+      'Event type ' + e.type);
+  this.renderOAuthButton_();
+};
+
+
+/**
+ * Callback for the OAuth identifier that puts up a picture of the end user and
+ * an input box for their message.
+ *
+ * @param {messageboard.OAuthIdentifier.GooglePlusIdSuccessEvent} e Event with
+ *     the metadata about the end user.
+ */
+messageboard.MessagePostController.prototype.hangleOAuthIdSuccess_ =
+    function(e) {
+  this.gPlusId_ = e.gPlusId;
+  this.renderPostOverly_(e.gPlusThumbnail);
+};
+
+
+/**
+ * Renders the authentication button and adds a listener to the button.
+ *
+ * @private
+ */
+messageboard.MessagePostController.prototype.renderOAuthButton_ = function() {
+  goog.soy.renderElement(this.container_,
+      messageboard.templates.messagepost.postOverlayNotSignedIn);
+
+  // Add a control to the one and only button.
+  this.authButtonControl_ = new goog.ui.CustomButton('',
+      goog.ui.Css3ButtonRenderer.getInstance());
+  this.authButtonControl_.decorate(
+      goog.dom.getElementByClass(goog.getCssName('auth-button')));
+  this.eventHandler_.listen(this.authButtonControl_,
+      goog.ui.Component.EventType.ACTION,
+      function(e) {
+        this.logger.warning('Clicked the auth button to launch popup.');
+        this.oauthIdentifier_.authorizePopUp();
+      });
+};
+
+
+/**
+ * Renders the user thumbnail and input box.  Adds a listener to the input box
+ * for the enter key.
+ *
+ * @param {string} userThumbnail Url of the end users Google+ thumbnail.
+ * @private
+ */
+messageboard.MessagePostController.prototype.renderPostOverly_ =
+    function(userThumbnail) {
+  goog.soy.renderElement(this.container_,
+      messageboard.templates.messagepost.postOverlay,
+      {userThumbnail: userThumbnail});
+  this.keyHandler_ = new goog.events.KeyHandler(
+      goog.dom.getElement('post-input'));
+  this.eventHandler_.listen(this.keyHandler_,
+      goog.events.KeyHandler.EventType.KEY, this.onKeyEvent_);
+};
 
 
 /**
@@ -149,43 +201,30 @@ messageboard.MessagePostController.prototype.onKeyEvent_ = function(e) {
 
 
 /**
- * 
+ * Submits the message to the backend.
  */
 messageboard.MessagePostController.prototype.submitMessage_ = function() {
   this.logger.info('Submit the text in the box.');  
-
-  var postValue = goog.dom.getElement('post-input').value;
-  var newMessage = {'google_plus_id': '108456725833219286408', 'comment': postValue};
+  var inputValue = goog.dom.getElement('post-input').value;
+  var newMessage = {'google_plus_id': this.gPlusId_, 'comment': inputValue};
   goog.dom.getElement('post-input').value = '';
-
-//  goog.net.XhrIo.prototype.withCredentials_ = true;
-  
-  
   var postBodyJson = goog.json.serialize(newMessage);
   goog.net.XhrIo.send(
       '/api',
       goog.bind(this.handleXhrResponse_, this),
       'POST',
       postBodyJson,
-      {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'});
-
-//  var xhr = new goog.net.XhrIo();
-//  xhr.setWithCredentials(true);
-//  xhr.addEventListener(goog.net.EventType.COMPLETE, goog.bind(this.handleXhrResponse_, this)),
-//  xhr.send(
-//      'http://rose-message-board.appspot.com',
-//      'POST',
-//      postBodyJson,
-//      {'Content-Type': 'application/json', 'X-Requested-With': 'XMLHttpRequest'});
-  
-//  goog.net.CrossDomainRpc.send('http://rose-message-board.appspot.com',
-//      function(e) {
-//    window.console.log("Response back" + e.responseText);
-//  });
+      {'Content-Type': 'application/json'});
 };
 
-messageboard.MessagePostController.prototype.handleXhrResponse_ = function(e) {
 
+/**
+ * Processed the backend response to make sure there were no errors.  Fires
+ * an event if the message was successfully added.
+ *
+ * @param {goog.events.BrowserEvent} e Event for XHR response.
+ */
+messageboard.MessagePostController.prototype.handleXhrResponse_ = function(e) {
   var xhr = /** @type {goog.net.XhrIo} */ (e.target);  
   if (!xhr.isSuccess()) {
     this.logger.warning('Xhr POST requested failed with status ' +
@@ -199,7 +238,12 @@ messageboard.MessagePostController.prototype.handleXhrResponse_ = function(e) {
     return;
   }
   this.logger.info('Status = ' + messageResponse['status']);
-  this.logger.info('Message = ' + messageResponse['message']);
+  this.logger.info('Message comment added was = ' +
+      messageResponse['message']['comment']);
+  
+  // Fire an event that a new message has been successfully added.
+  this.dispatchEvent(
+      messageboard.MessagePostController.EventType.NEW_MESSAGE_POSTED);
 };
 
 
@@ -211,6 +255,12 @@ messageboard.MessagePostController.prototype.disposeInternal = function() {
   this.eventHandler_.removeAll();
   goog.dispose(this.eventHandler_);
   delete this.eventHandler_;
+
+  // Remove components that add listeners.
+  goog.dispose(this.authButtonControl_);
+  delete this.authButtonControl_;
+  goog.dispose(this.keyHandler_);
+  delete this.keyHandler_;
   
   // Remove the DOM elements.
   goog.dom.removeChildren(this.container_);

@@ -1,7 +1,7 @@
 
 #message-post {
 	position: fixed;
-	bottom: 0px;
+	bottom: 8px;
 	width: 100%;
 	margin: 0;
 	padding: 0;
@@ -57,11 +57,15 @@
     -moz-box-flex: 1;
     box-flex: 1;
     display: block;
-	height: 20px;
-    margin: 15px 5px 22px;
+	  height: 20px;
+    margin: 15px 5px 42px;
     background-color: white;
     border: solid 2px darkgrey;
     border-radius: 10px;
+}
+
+.auth-button {
+	margin: 8px 0 15px;
 }
 
 

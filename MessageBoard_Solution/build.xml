@@ -22,14 +22,14 @@
   	  description="Deletes the contents of the build directory">
     <delete dir="${build.dir}" />
     <mkdir dir="${build.dir}"/>
-    <mkdir dir="${build.dir}/files/js"/>
-    <mkdir dir="${build.dir}/files/stylesheets"/>
+    <mkdir dir="${build.dir}/production/js"/>
+    <mkdir dir="${build.dir}/production/stylesheets"/>
   </target>
 
   <target name="stylesheets"
     description="Generate a combined, minified css file.">
   	<generate-stylesheet
-        outputfile = '${build.dir}/files/stylesheets/message_board.css'
+        outputfile = '${build.dir}/production/stylesheets/message_board.css'
   		renamingmap = '${build.dir}/renaming_map.js'>
       <inputfilenames>
         <arg value="stylesheets/common.css" />
@@ -99,7 +99,7 @@
 
   <target name="replicate"
   	  description="Copy non-js files into the build folder as necessary">
-    <copy todir="${build.dir}/files">
+    <copy todir="${build.dir}/production">
       <fileset dir=".">
         <include name="message_board.html" />
         <include name="images/**" />
@@ -110,7 +110,7 @@
   <target name="compile" description="generates the compiled javascript">
     <closure-builder
       root='${basedir}/js/'
-      outputfile="${build.dir}/files/js/message_board.js"
+      outputfile="${build.dir}/production/js/message_board.js"
       compilationlevel="${closure.optimizations}" > <!-- Selects value based on debug property -->
       <namespaces>
         <arg line='--namespace=messageboard.Main' />
@@ -131,9 +131,9 @@
       </fileset>
     </copy>
     <copy tofile="../rose-message-board/js/message_board.js"
-      file="${build.dir}/files/js/message_board.js" />
+      file="${build.dir}/production/js/message_board.js" />
     <copy tofile="../rose-message-board/stylesheets/message_board.css"
-      file="${build.dir}/files/stylesheets/message_board.css" />
+      file="${build.dir}/production/stylesheets/message_board.css" />
   </target>
 
   <target name="build" depends="clean, stylesheets, templates, gen_js_deps, replicate, compile, appengine-replicate" />

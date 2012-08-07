@@ -1,9 +1,10 @@
+{namespace messageboard.templates.messageviewer}
+
 /**
  * Builds up the html used within the Message Board viewer.
  * Author: fisherds@gmail.com (Dave Fisher)
  */
 
-{namespace messageboard.templates.messageviewer}
 
 /**
  * Loads the viewer DOM elements.
@@ -21,7 +22,10 @@
       {param last_digit: $message['last_digit'] /}
     {/call}
   {ifempty}
-    <h2>No messages found.  Maybe you should write the first message.</h2>
+    <center>
+      <h1>No messages found.</h1>
+      <h2>Maybe you should write the first message.</h2>
+    </center>
   {/foreach}
 </ol>
 {/template}

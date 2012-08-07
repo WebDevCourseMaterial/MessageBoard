@@ -15,13 +15,13 @@ handlers:
 - url: /js
   static_dir: js
 
-- url: /style
-  static_dir: style
+- url: /stylesheets
+  static_dir: stylesheets
 
 - url: /images
   static_dir: images
 
-- url: .*
+- url: /
   static_files: message_board.html
   upload: message_board\.html  
 

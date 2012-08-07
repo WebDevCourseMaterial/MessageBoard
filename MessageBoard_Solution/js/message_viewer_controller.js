@@ -6,6 +6,8 @@
  */
 
 goog.provide('messageboard.MessageViewerController');
+goog.provide('messageboard.Message');
+goog.provide('messageboard.MessageResponse');
 
 goog.require('goog.Uri');
 goog.require('goog.dom');
@@ -96,18 +98,18 @@ messageboard.MessageViewerController.prototype.init_ = function() {
 
 
 /** @typedef
- * {{comment: string,
- *   created_date_time: string,
- *   message_id: number,
- *   google_plus_id: string}}
+ * {{'comment': string,
+ *   'created_date_time': string,
+ *   'message_id': number,
+ *   'google_plus_id': string}}
  */
 messageboard.Message;
 
 
 /** @typedef
- * {{status: string,
- *   messages: Array.<messageboard.Message>,
- *   error: string}}
+ * {{'status': string,
+ *   'messages': Array.<messageboard.Message>,
+ *   'error': string}}
  */
 messageboard.MessageResponse;
 

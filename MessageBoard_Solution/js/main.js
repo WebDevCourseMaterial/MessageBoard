@@ -15,6 +15,9 @@ goog.require('goog.events');
 goog.require('messageboard.MessageBoardController');
 goog.require('messageboard.MessagePostController');
 goog.require('messageboard.MessageViewerController');
+goog.require('messageboard.OAuthIdentifier');
+
+
 
 /**
  * Entry point for the JavaScript.  Your code begins here.
@@ -29,8 +32,8 @@ messageboard.Main = function() {
   new messageboard.MessageViewerController(/** @type {!Element} */
       (goog.dom.getElement('message-viewer')));
   new messageboard.MessagePostController(/** @type {!Element} */
-      (goog.dom.getElement('message-post')));  
-
+      (goog.dom.getElement('message-post')),
+      new messageboard.OAuthIdentifier());
 };
 
 

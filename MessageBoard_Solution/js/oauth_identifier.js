@@ -24,6 +24,7 @@ goog.require('goog.net.XhrIo');
 goog.require('goog.string');
 
 
+
 /**
  * Creates a helper to do OAuth and make a call to the Google+ API to get the
  * end users Google+ id, thumbnail, and name.
@@ -70,11 +71,8 @@ messageboard.OAuthIdentifier = function() {
    * @private
    */
   this.tokenExpirationTimer_ = null;
-  
-  this.init_();
 };
 goog.inherits(messageboard.OAuthIdentifier, goog.events.EventTarget);
-goog.addSingletonGetter(messageboard.OAuthIdentifier);
 
 
 /**
@@ -104,6 +102,9 @@ messageboard.OAuthIdentifier.EventType = {
  */
 messageboard.OAuthIdentifier.GooglePlusIdSuccessEvent =
     function(oauthIdentifier, gPlusId, gPlusDisplayName, gPlusThumbnail) {
+  goog.base(this, messageboard.OAuthIdentifier.EventType.GOOGLE_PLUS_ID_SUCCESS,
+      oauthIdentifier);
+
   /**
    * Google+ id of the end user.
    * @type {string} 
@@ -134,7 +135,8 @@ goog.inherits(messageboard.OAuthIdentifier.GooglePlusIdSuccessEvent,
  * @type {string}
  * @const
  */
-messageboard.OAuthIdentifier.API_KEY = 'AIzaSyC4hhfmlBAmxe269S-_2xXr8fUKFAF7qrI';
+messageboard.OAuthIdentifier.API_KEY =
+    'AIzaSyC4hhfmlBAmxe269S-_2xXr8fUKFAF7qrI';
 
 
 /**
@@ -169,6 +171,15 @@ messageboard.OAuthIdentifier.GOOGLE_PLUS_PEOPLE_REQUEST =
 
 
 /**
+ * Id placed on the api script tag.  Used to determine if the script is already
+ * present and used to remove the script on dispose.
+ * @type {string}
+ * @const
+ */
+messageboard.OAuthIdentifier.AUTH_SCRIPT_TAG_ID = 'google-api-script';
+
+
+/**
  * Logger for this class.
  * @type {goog.debug.Logger}
  */
@@ -177,18 +188,23 @@ messageboard.OAuthIdentifier.prototype.logger =
 
 
 /**
- * Initialize by adding the script and callback function.
+ * Initialize by adding the auth.js script to the DOM.  Then attempt to complete
+ * a background (silent) authorization.  Background authorization will only work
+ * if a user is already logged in at present (authenticated) and they have
+ * previously given rights to our page (authorized).  If background oauth does
+ * not work then fire that an authorize button needs to be created.
  */
-messageboard.OAuthIdentifier.prototype.init_ = function() {
-  if (goog.dom.getElement('google-api-script')) {
-    this.logger.severe('OAuthIdentifier loaded twice');
+messageboard.OAuthIdentifier.prototype.initialize = function() {
+  if (goog.dom.getElement(messageboard.OAuthIdentifier.AUTH_SCRIPT_TAG_ID)) {
+    this.logger.warning('Initialized a second OAuthIdentifier.');
+    this.authorizeBackground();
     return;
   }
   // Add the Google API client script to the DOM.
   var clientScript = goog.dom.createDom(
       'script',
       {
-        'id': 'google-api-script',
+        'id': messageboard.OAuthIdentifier.AUTH_SCRIPT_TAG_ID,
         'type': 'text/javascript',
         'src': 'https://apis.google.com/js/auth.js?onload=init'
       });
@@ -198,8 +214,9 @@ messageboard.OAuthIdentifier.prototype.init_ = function() {
   this.logger.info('Added the gapi script. Waiting for it to call init.');
   var oauthInstance = this;
   // This function has been added to the global object (ie window) so that it
-  // can easily be used in a JSONP callback by Google's OAuth script.
+  // can easily be used in a JSONP style callback by Google's OAuth script.
   goog.global['init'] = function() {
+    // Delay feature based on Google's sample code for using auth.js.
     new goog.async.Delay(goog.bind(function() {
       this.logger.info('Init called.  Attempt to background authorize.');
       this.authorizeBackground();
@@ -293,12 +310,13 @@ messageboard.OAuthIdentifier.prototype.makeAuthenticatedIdCall = function() {
   requestUri.setParameterValue('key', messageboard.OAuthIdentifier.API_KEY);
   // Limit the response fields to only the data we want (optional).
   requestUri.setParameterValue('fields', 'displayName,id,image');
+  this.logger.info('OAuthToken = ' + this.oauthToken);
   goog.net.XhrIo.send(
       requestUri.toString(),
       goog.bind(this.handleAuthorizedGooglePlusResponse_, this),
       'GET',
       null,
-      {'Authorization': 'Bearer ' + this.oauthToken['access_token']});
+      {'Authorization': 'Bearer ' + this.oauthToken});
 };
 
 
@@ -373,6 +391,18 @@ messageboard.OAuthIdentifier.prototype.handleOAuthRefreshTimeout_ = function() {
   this.logger.info('Time to update the OAuth token.');
   
   // TODO: Implement refreshing the OAuth token.
+
   // Pretend like it got refreshed for now.
   this.dispatchEvent(messageboard.OAuthIdentifier.EventType.OAUTH_REFRESHED);
+};
+
+
+/** inheritDoc */
+messageboard.OAuthIdentifier.prototype.disposeInternal = function() {
+  // No listeners to remove just a DOM element and a few methods.
+  var scriptTag = goog.dom.getElement(
+      messageboard.OAuthIdentifier.AUTH_SCRIPT_TAG_ID);
+  goog.dom.removeNode(scriptTag);
+  goog.global['init']  = null;
+  goog.global['gapi'] = null;
 };
