@@ -26,7 +26,7 @@ goog.require('messageboard.templates.messageviewer');
 /**
  * Populates a list with a rose-message-board response.
  *
- * @param {!Element} container The element for this controller's content.
+ * @param {Element} container The element for this controller's content.
  * @constructor
  * @extends {goog.events.EventTarget}
  */
@@ -35,7 +35,7 @@ messageboard.MessageViewerController = function(container) {
   
   /**
    * Container element for this controller's content.
-   * @type {!Element}
+   * @type {Element}
    * @private
    */
   this.container_ = container;
@@ -47,7 +47,7 @@ messageboard.MessageViewerController = function(container) {
    */
   this.eventHandler_ = new goog.events.EventHandler(this);
   
-  this.init_();
+  this.updateMessages();
   
 };
 goog.inherits(messageboard.MessageViewerController, goog.events.EventTarget);
@@ -86,12 +86,12 @@ messageboard.MessageViewerController.prototype.logger =
 
 
 /**
- * Initialize the message view controller.
- * @private
+ * Updates the messages displayed in the UI.  Starts the process by doing a new
+ * request from the AppEngine server for messages.
  */
-messageboard.MessageViewerController.prototype.init_ = function() {
+messageboard.MessageViewerController.prototype.updateMessages = function() {
   goog.net.XhrIo.send(
-      //'http://www.rose-message-board.com/api?limit=12',  // First round version
+      //'http://www.rose-message-board.com/api?limit=12', // Full path.
       '/api?limit=12',
       goog.bind(this.handleMessagesResponse_, this));
 };
@@ -144,7 +144,8 @@ messageboard.MessageViewerController.prototype.handleMessagesResponse_ =
   }
   this.renderUiForMessageResponse_(messageResponse);
 };
-  
+
+
 /**
  * Handles the JSON reply from AppEngine with the list of messages.
  * @param {messageboard.MessageResponse} messageResponse AppEngine response.
@@ -161,6 +162,7 @@ messageboard.MessageViewerController.prototype.renderUiForMessageResponse_ =
     this.getGooglePlusId_(unknownIds[i]);
   }
 };
+
 
 /**
  * Attempts to use values from 

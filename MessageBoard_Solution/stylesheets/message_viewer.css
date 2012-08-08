@@ -13,10 +13,6 @@ ol {
 	list-style: none;
 }
 
-li:last-child {
-  margin-bottom: 100px;
-}
-
 .message {
 	float: left;
 	width: 100%;

@@ -1,40 +1,47 @@
 
 #message-post {
 	position: fixed;
-	bottom: 8px;
 	width: 100%;
 	margin: 0;
 	padding: 0;
+	top: 0;
+}
+
+.no-messages {
+	text-align: center;
 }
 
 .post-backdrop {
-    /* @alternate */ background-image:-moz-linear-gradient(50% 0% -90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%); 
-    /* @alternate */ background-image:-webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(0,0,0,0.6)),color-stop(1, rgba(0,0,0,0.6)));
-    /* @alternate  background-image:-webkit-linear-gradient(-90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%);*/
-    /* @alternate */ background-image:-o-linear-gradient(-90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%);
-    /* @alternate */ background-image:-ms-linear-gradient(-90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%);
-    /*background-image:linear-gradient(-90deg,rgba(0,0,0,0.6) 0%,rgba(0,0,0,0.6) 100%);*/
-    -moz-box-shadow:0px 0px 20px 10px rgba(0,0,0,0.6);
-	-webkit-box-shadow:0px 0px 20px 10px rgba(0,0,0,0.6);
-	box-shadow:0px 0px 20px 10px rgba(0,0,0,0.6);
+	/* @alternate */ background-image:-moz-linear-gradient(50% 0% -90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%); 
+  /* @alternate */ background-image:-webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(150, 55, 55, 1)),color-stop(1, rgba(0,0,0,1)));
+  /* @alternate  background-image:-webkit-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);*/
+  /* @alternate */ background-image:-o-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);
+  /* @alternate */ background-image:-ms-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);
+  /*background-image:linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);*/
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  -moz-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+	-webkit-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+	box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+  z-index:-1;
 }
 
 .post-controls {
-    display: -webkit-box;
-    -webkit-box-orient: horizontal;
-    -webkit-box-align: stretch;
+  display: -webkit-box;
+  -webkit-box-orient: horizontal;
+  -webkit-box-align: stretch;
  
-    display: -moz-box;
-    -moz-box-orient: horizontal;
-    -moz-box-align: stretch;
+  display: -moz-box;
+  -moz-box-orient: horizontal;
+  -moz-box-align: stretch;
  
-    display: box;
-    box-orient: horizontal;
-    box-align: stretch;
+  display: box;
+  box-orient: horizontal;
+  box-align: stretch;
     
-    -webkit-box-pack: center;
-    -moz-box-pack: center;
-    box-pack: center;
+  -webkit-box-pack: center;
+  -moz-box-pack: center;
+  box-pack: center;
 }    
     
 .post-controls > * {
@@ -44,36 +51,37 @@
 }
 
 .post-backdrop img {
-  margin: 0 33px;
+  margin: 8px 33px;
   border-radius: 10px;
   box-shadow:2px 2px 2px 2px rgba(255,255,255,0.5);
   -moz-transform: rotate(-2deg);
   -webkit-transform: rotate(-2deg);
   transform: rotate(-2deg);
+  z-index: 1;
 }
 
 #post-input {
-    -webkit-box-flex: 1;
-    -moz-box-flex: 1;
-    box-flex: 1;
-    display: block;
-	  height: 20px;
-    margin: 15px 5px 42px;
-    background-color: white;
-    border: solid 2px darkgrey;
-    border-radius: 10px;
+  background-color: white;
+  border: solid 2px darkgrey;
+  border-radius: 10px;
+  -webkit-box-flex: 1;
+  -moz-box-flex: 1;
+  box-flex: 1;
+  display: block;
+  height: 20px;
+  margin: 20px 5px 25px;
+  outline: none;
+  z-index: 2;
 }
 
 .auth-button {
 	margin: 8px 0 15px;
 }
 
-
-@media screen and (min-width: 640px) {
-    .post-controls {
-      position: relative;
-      width: 640px;
-      left: 50%;
-      margin-left: -320px;
-    }
+@media screen and (min-width: 660px) {
+  #message-post {
+    width: 660px;
+    left: 50%;
+    margin-left: -330px;
+  }
 }

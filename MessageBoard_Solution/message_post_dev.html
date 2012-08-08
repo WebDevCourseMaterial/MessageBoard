@@ -25,7 +25,8 @@
       logconsole.setCapturing(true);
     
       new messageboard.MessagePostController(/** @type {!Element} */ (
-          goog.dom.getElement('message-post')));  
+          goog.dom.getElement('message-post')),
+          new messageboard.OAuthIdentifier());  
     </script>
   </body>
 </html>

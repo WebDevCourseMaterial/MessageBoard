@@ -25,7 +25,7 @@ goog.require('messageboard.templates.messagepost');
 /**
  * Controller used author messages sent to the rose-message-board.
  *
- * @param {!Element} container The element for this controller's content.
+ * @param {Element} container The element for this controller's content.
  * @param {messageboard.OAuthIdentifier} oauthIdentifier The element for this controller's content.
  * @constructor
  * @extends {goog.events.EventTarget}
@@ -35,7 +35,7 @@ messageboard.MessagePostController = function(container, oauthIdentifier) {
   
   /**
    * Container element for this controller's content.
-   * @type {!Element}
+   * @type {Element}
    * @private
    */
   this.container_ = container;
@@ -109,10 +109,15 @@ messageboard.MessagePostController.prototype.init_ = function() {
       this.hangleOAuthIdFailure_);
   this.eventHandler_.listen(this.oauthIdentifier_,
       messageboard.OAuthIdentifier.EventType.GOOGLE_PLUS_ID_SUCCESS,
-      this.hangleOAuthIdSuccess_);  
-  // TODO: Create a timer that will fire if no events occur (ie a fallback).
-  //this.renderOAuthButton_();
+      this.hangleOAuthIdSuccess_);
+  
+  // CONSIDER: Create a timer that will fire if no events occur (ie a fallback).
+  
   this.oauthIdentifier_.initialize();
+  // For layout testing you can show one of the display UIs directly (cheating).
+  //this.renderOAuthButton_();
+  //this.renderPostOverly_('https://lh5.googleusercontent.com/-vB9HMliwbIY/' +
+  //  'AAAAAAAAAAI/AAAAAAAAAAA/kVHRubd8QZM/photo.jpg?sz=50');
 };
 
 
@@ -214,7 +219,10 @@ messageboard.MessagePostController.prototype.submitMessage_ = function() {
       goog.bind(this.handleXhrResponse_, this),
       'POST',
       postBodyJson,
-      {'Content-Type': 'application/json'});
+      {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + this.oauthIdentifier_.oauthToken
+      });
 };
 
 

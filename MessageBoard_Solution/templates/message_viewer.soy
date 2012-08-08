@@ -22,10 +22,10 @@
       {param last_digit: $message['last_digit'] /}
     {/call}
   {ifempty}
-    <center>
-      <h1>No messages found.</h1>
-      <h2>Maybe you should write the first message.</h2>
-    </center>
+    <div class="{css no-messages}">
+      <h1>No messages found</h1>
+      <h2><em>Maybe you should write the first message!</em></h2>
+    </div>
   {/foreach}
 </ol>
 {/template}
