@@ -22,7 +22,7 @@ function setUp() {
 function tearDown() {
   goog.dispose(messageViewerController);
   // Make sure dispose removes all listeners and DOM elements.
-  var testDivEl = goog.dom.getElement('testDiv');
+  var testDivEl = goog.dom.getElement('test-div');
   assertEquals(0, goog.dom.getChildren(testDivEl).length);
   assertEquals(0, goog.events.getTotalListenerCount());
 }

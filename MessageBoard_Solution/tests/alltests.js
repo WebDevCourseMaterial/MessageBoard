@@ -15,4 +15,5 @@
 var _allTests = ["message_board_controller_test.html",
                  "message_post_controller_test.html",
                  "message_viewer_controller_test.html",
+                 "message_viewer_storage_test.html",
                  "oauth_identifier_test.html"];

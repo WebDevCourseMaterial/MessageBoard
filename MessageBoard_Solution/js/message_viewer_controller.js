@@ -6,10 +6,10 @@
  */
 
 goog.provide('messageboard.MessageViewerController');
-goog.provide('messageboard.Message');
 goog.provide('messageboard.MessageResponse');
 
 goog.require('goog.Uri');
+goog.require('goog.array');
 goog.require('goog.dom');
 goog.require('goog.dom.classes');
 goog.require('goog.events');
@@ -19,6 +19,8 @@ goog.require('goog.debug.Logger');
 goog.require('goog.json');
 goog.require('goog.net.XhrIo');
 goog.require('goog.soy');
+goog.require('messageboard.Message');
+goog.require('messageboard.MessageViewerStorage');
 goog.require('messageboard.templates.messageviewer');
 
 
@@ -54,27 +56,22 @@ goog.inherits(messageboard.MessageViewerController, goog.events.EventTarget);
 
 
 /**
+ * Message from the backend.  Note this typedef is for documentation.
+ * @typedef {{
+ *   'status': string,
+ *   'messages': Array.<messageboard.Message>,
+ *   'error': string}}
+ */
+messageboard.MessageResponse;
+
+
+/**
  * Google API key generated from https://developers.google.com/console/
  * 
  *            CHANGE THIS TO YOUR OWN KEY!!!
  */
 messageboard.MessageViewerController.API_KEY =
     'AIzaSyC4hhfmlBAmxe269S-_2xXr8fUKFAF7qrI';
-
-
-/**
- * Display name when no author name is found.
- * @type {string}
- */
-messageboard.MessageViewerController.UNKNOWN_NAME = 'Unknown';
-
-
-/**
- * Link to the image that should be used if no image is found for author.
- * @type {string}
- */
-messageboard.MessageViewerController.UNKNOWN_PHOTO =
-    'images/no_photo_gitcat.png';
 
 
 /**
@@ -92,26 +89,9 @@ messageboard.MessageViewerController.prototype.logger =
 messageboard.MessageViewerController.prototype.updateMessages = function() {
   goog.net.XhrIo.send(
       //'http://www.rose-message-board.com/api?limit=12', // Full path.
-      '/api?limit=12',
+      '/api?limit=10',
       goog.bind(this.handleMessagesResponse_, this));
 };
-
-
-/** @typedef
- * {{'comment': string,
- *   'created_date_time': string,
- *   'message_id': number,
- *   'google_plus_id': string}}
- */
-messageboard.Message;
-
-
-/** @typedef
- * {{'status': string,
- *   'messages': Array.<messageboard.Message>,
- *   'error': string}}
- */
-messageboard.MessageResponse;
 
 
 /** @typedef
@@ -142,59 +122,43 @@ messageboard.MessageViewerController.prototype.handleMessagesResponse_ =
         messageResponse['error']);
     return;
   }
-  this.renderUiForMessageResponse_(messageResponse);
+  var messages = messageResponse['messages'];
+  this.renderUiForMessages_(messages);
 };
 
 
 /**
  * Handles the JSON reply from AppEngine with the list of messages.
- * @param {messageboard.MessageResponse} messageResponse AppEngine response.
+ *
+ * @param {Array.<messageboard.Message>} messages  Array of messages from the
+ *     AppEngine backend.
+ * @param {boolean=} append If true add these messages onto the end of the
+ *     messages already being displayed.  If false clear any messages being
+ *     displayed and replace the contents with these new offset=0 messages.
  * @private
  */
-messageboard.MessageViewerController.prototype.renderUiForMessageResponse_ =
-    function(messageResponse) {
-  var unknownIds = this.addKnownIds_(messageResponse);
-  var data = {messages: messageResponse['messages']};
-  goog.soy.renderElement(this.container_,
-      messageboard.templates.messageviewer.messagesList, data);
+messageboard.MessageViewerController.prototype.renderUiForMessages_ =
+    function(messages, append) {
+  var storage = messageboard.MessageViewerStorage.getInstance();
+  var unknownIds = storage.addKnownAuthorMetadata(messages);
+  var data = {messages: messages};
+  if (append) {
+    // TODO: Use a template to create a fragment then insert fragment.
+  } else {
+    goog.soy.renderElement(this.container_,
+        messageboard.templates.messageviewer.messagesList, data);    
+  }
   // Use the Google+ API to figure out the missing authors.
-  for (var i = 0; i < unknownIds.length; i++) {
-    this.getGooglePlusId_(unknownIds[i]);
-  }
-};
-
-
-/**
- * Attempts to use values from 
- * @param {messageboard.MessageResponse} messageResponse AppEngine response.
- * @return {Array.<string>} List of Google+ ids that were not found in storage.
- * @private
- */
-messageboard.MessageViewerController.prototype.addKnownIds_ =
-    function(messageResponse) {
-  var messages = messageResponse['messages'];
-  var unknownIds = [];
-  for (var i = 0; i < messages.length; i++) {
-    var message = messages[i];
-    if (!this.addStoredGooglePlusInfo_(message)) {
-      // Google+ id was not found and no fields were added to the message.
-      message['display_name'] =
-          messageboard.MessageViewerController.UNKNOWN_NAME;
-      message['image_url'] =
-          messageboard.MessageViewerController.UNKNOWN_PHOTO;
-      goog.array.insert(unknownIds, message['google_plus_id']);
-    }
-    var gPlusLen = message['google_plus_id'].length;
-    message['first_digit'] = message['google_plus_id'].substring(3, 4);
-    message['last_digit'] = message['google_plus_id'].substring(gPlusLen-1, gPlusLen);
-  }
-  return unknownIds;
+  goog.array.forEach(unknownIds, goog.bind(function(unknownId) {
+    this.getGooglePlusId_(unknownId);
+  }, this));
 };
 
 
 /**
  * Get the name and thumbnail for the Google+ id.  Add the response to the page
  * and to localStorage.
+ *
  * @param {string} gPlusId Google+ id to retrieve from local storage.
  * @private
  */
@@ -237,7 +201,6 @@ messageboard.MessageViewerController.prototype.handleGooglePlusApiResponse_ =
   // Change the requested image size to 80 instead of 50.
   var imageUri = new goog.Uri(imageUrl);
   imageUri.setParameterValue('sz', '80');
-  this.logger.info('Changed image url to ' + imageUri.toString());
 
   // Add the Google+ info to all the author notes on the page.
   var imgs = goog.dom.getDocument().querySelectorAll('.gp-' + gPlusId + ' img');
@@ -248,55 +211,10 @@ messageboard.MessageViewerController.prototype.handleGooglePlusApiResponse_ =
   goog.array.forEach(names, function(nameEl) {
     nameEl.innerHTML = displayName; // Think about XSS risks.
   });
-  this.storeGooglePlusInfo_(gPlusId, displayName, imageUrl);
+  var storage = messageboard.MessageViewerStorage.getInstance();
+  storage.storeGooglePlusInfo(gPlusId, displayName, imageUrl);
 };
 
-
-/**
- * Adds the Google+ info into local storage so that this id won't need to be
- * retrieved in the future.
- *
- * @param {string} gPlusId Google+ id to save into local storage.
- * @param {string} displayName Name associated with the Google+ id.
- * @param {string} imageUrl Image associated with the Google+ id.
- */
-messageboard.MessageViewerController.prototype.storeGooglePlusInfo_ =
-    function(gPlusId, displayName, imageUrl) {
-  var gPlusInfo = {'display_name': displayName,
-                   'image_url': imageUrl};
-  var gPlusInfoJson = goog.json.serialize(gPlusInfo);
-  window.localStorage.setItem(gPlusId, gPlusInfoJson);
-};
-
-
-/**
- * Attempts to retrieve the Google+ id from local storage.  If the id is found
- * then the display_name and image_url are added to the message.  If the id is
- * not found then return false and add no fields.
- *
- * @param {messageboard.Message} message Individual message from the list
- *     retrieved from AppEngine.
- * @return {boolean} True if the Google+ info was available in local storage.
- *     False if the Google+ id was not found in local storage.
- */
-messageboard.MessageViewerController.prototype.addStoredGooglePlusInfo_ =
-    function(message) {
-  if (!message.hasOwnProperty('google_plus_id')) {
-    return false;
-  }
-  var gPlusId = message['google_plus_id']; 
-  var localStorageResult = window.localStorage.getItem(gPlusId);
-  if (localStorageResult) {
-    var gPlusInfo = goog.json.parse(localStorageResult);
-    if (gPlusInfo.hasOwnProperty('display_name') &&
-        gPlusInfo.hasOwnProperty('image_url')) {
-      message['display_name'] = gPlusInfo['display_name'];
-      message['image_url'] = gPlusInfo['image_url'];
-      return true;
-    }
-  }
-  return false;
-};
 
 
 /** inheritDoc */

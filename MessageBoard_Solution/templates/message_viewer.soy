@@ -18,8 +18,8 @@
       {param display_name: $message['display_name'] /}
       {param image_url: $message['image_url'] /}
       {param comment: $message['comment'] /}
-      {param first_digit: $message['first_digit'] /}
-      {param last_digit: $message['last_digit'] /}
+      {param comment_color: $message['comment_color'] /}
+      {param author_color: $message['author_color'] /}
     {/call}
   {ifempty}
     <div class="{css no-messages}">
@@ -37,16 +37,16 @@
  * @param display_name The author's name.
  * @param image_url The author's image.
  * @param comment The comment for this message.
- * @param first_digit The first digit of the Google+ id.
- * @param last_digit The last digit of the Google+ id.
+ * @param comment_color The first digit of the Google+ id.
+ * @param author_color The last digit of the Google+ id.
  */
 {template .messageListItem}
   <li class="{css message}">
-    <div class="{css author} {css goog-inline-block} gp-{$google_plus_id} color-{$last_digit} author-angle-{randomInt(10)}">
+    <div class="{css author} {css goog-inline-block} gp-{$google_plus_id} color-{$author_color} author-angle-{randomInt(10)}">
       <img src="{$image_url}" width="80" height="80" alt="author photo">
       <h4>{$display_name}</h4>
     </div>
-    <div class="{css comment} color-{$first_digit} comment-angle-{randomInt(10)}">
+    <div class="{css comment} color-{$comment_color} comment-angle-{randomInt(10)}">
       <p>{$comment}</p>
     </div>
   </li>
