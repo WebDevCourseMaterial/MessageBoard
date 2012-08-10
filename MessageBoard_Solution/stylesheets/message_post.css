@@ -1,81 +1,9 @@
 
 #message-post {
-	position: fixed;
+	position: absolute;
 	width: 100%;
-	margin: 0;
-	padding: 0;
+  text-align: center;
 	top: 0;
-}
-
-.no-messages {
-	text-align: center;
-}
-
-.post-backdrop {
-	/* @alternate */ background-image:-moz-linear-gradient(50% 0% -90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%); 
-  /* @alternate */ background-image:-webkit-gradient(linear,50% 0%,50% 100%,color-stop(0, rgba(150, 55, 55, 1)),color-stop(1, rgba(0,0,0,1)));
-  /* @alternate  background-image:-webkit-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);*/
-  /* @alternate */ background-image:-o-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);
-  /* @alternate */ background-image:-ms-linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);
-  /*background-image:linear-gradient(-90deg,rgba(150, 55, 55, 1) 0%,rgba(0,0,0,1) 100%);*/
-  border-bottom-left-radius: 10px;
-  border-bottom-right-radius: 10px;
-  -moz-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
-	-webkit-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
-	box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
-  z-index:-1;
-}
-
-.post-controls {
-  display: -webkit-box;
-  -webkit-box-orient: horizontal;
-  -webkit-box-align: stretch;
- 
-  display: -moz-box;
-  -moz-box-orient: horizontal;
-  -moz-box-align: stretch;
- 
-  display: box;
-  box-orient: horizontal;
-  box-align: stretch;
-    
-  -webkit-box-pack: center;
-  -moz-box-pack: center;
-  box-pack: center;
-}    
-    
-.post-controls > * {
-  -webkit-box-flex: 0;
-  -moz-box-flex: 0;
-  box-flex: 0;    
-}
-
-.post-backdrop img {
-  margin: 8px 33px;
-  border-radius: 10px;
-  box-shadow:2px 2px 2px 2px rgba(255,255,255,0.5);
-  -moz-transform: rotate(-2deg);
-  -webkit-transform: rotate(-2deg);
-  transform: rotate(-2deg);
-  z-index: 1;
-}
-
-#post-input {
-  background-color: white;
-  border: solid 2px darkgrey;
-  border-radius: 10px;
-  -webkit-box-flex: 1;
-  -moz-box-flex: 1;
-  box-flex: 1;
-  display: block;
-  height: 20px;
-  margin: 20px 5px 25px;
-  outline: none;
-  z-index: 2;
-}
-
-.auth-button {
-	margin: 8px 0 15px;
 }
 
 @media screen and (min-width: 660px) {
@@ -84,4 +12,65 @@
     left: 50%;
     margin-left: -330px;
   }
+}
+
+.no-messages {
+	text-align: center;
+}
+
+.post-backdrop {
+	background: #963737; /* Old browsers */
+  /* alternate */ background: -moz-linear-gradient(top,  #963737 0%, #000000 100%); /* FF3.6+ */
+  /* alternate */ background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#963737), color-stop(100%,#000000)); /* Chrome,Safari4+ */
+  /* alternate */ background: -webkit-linear-gradient(top,  #963737 0%,#000000 100%); /* Chrome10+,Safari5.1+ */
+  /* alternate */ background: -o-linear-gradient(top,  #963737 0%,#000000 100%); /* Opera 11.10+ */
+  /* alternate */ background: -ms-linear-gradient(top,  #963737 0%,#000000 100%); /* IE10+ */
+  background: linear-gradient(to bottom,  #963737 0%,#000000 100%); /* W3C */	
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
+  -moz-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+	-webkit-box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+	box-shadow: 0 0 40px 10px rgba(0, 0, 0, 1);
+  display: -webkit-flex;
+  display: -moz-flex;
+	display: flex;
+  height: 68px;
+  z-index: 1;  /* Positioned elements with a Z-level form a stacking context */
+  /* Link about painting https://developer.mozilla.org/en-US/docs/CSS/Understanding_z-index/The_stacking_context */
+}
+
+.img-wrapper {
+	position: relative;
+	width: 100px;
+}
+
+.post-backdrop img {
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px gray, 2px 2px 1px 1px rgba(150,150,150,0.75);
+  margin-top: -28px;
+  position: absolute;
+  top: 50%;
+  -moz-transform: rotate(-2deg);
+  -webkit-transform: rotate(-2deg);
+  transform: rotate(-2deg);
+}
+
+#post-input {
+	border: solid 2px darkgrey;
+  border-radius: 8px;
+  -webkit-flex: 1;
+  flex: 1;
+  font: 14px/20px Arial, san-serif;
+  outline: none;
+  padding-left: 7px;
+  margin: 16px 10px 0 0;
+}
+
+.auth-button-wrapper {
+	width: 100%;
+}
+
+.auth-button {
+	display: inline;
+	line-height: 68px;
 }

@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Message Board</title>
+    <link rel="stylesheet" type="text/css" href="stylesheets/common.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/message_viewer.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/colors_and_angles.css">
+    <script type="text/javascript" src="../../../closure/closure-library/closure/goog/base.js"></script>
+    <script type="text/javascript" src="build/deps.js"></script>
+    <script type="text/javascript">
+      goog.require('goog.debug.Console');
+      goog.require('goog.debug.Logger');
+      goog.require('goog.debug.LogManager');
+      goog.require('goog.dom');
+      goog.require('messageboard.MessageViewerController');
+    </script>
+  </head>
+  <body>
+    <div id="message-viewer">
+      <ol>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-0 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 0</h4>
+          </div>
+          <div class="comment color-0 comment-angle-5">
+            <p>Comment color-0</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-1 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 1</h4>
+          </div>
+          <div class="comment color-1 comment-angle-5">
+            <p>Comment color-1</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-2 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 2</h4>
+          </div>
+          <div class="comment color-2 comment-angle-5">
+            <p>Comment color-2</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-3 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 3</h4>
+          </div>
+          <div class="comment color-3 comment-angle-5">
+            <p>Comment color-3</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-4 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 4</h4>
+          </div>
+          <div class="comment color-4 comment-angle-5">
+            <p>Comment color-4</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-5 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 5</h4>
+          </div>
+          <div class="comment color-5 comment-angle-5">
+            <p>Comment color-5</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-6 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 6</h4>
+          </div>
+          <div class="comment color-6 comment-angle-5">
+            <p>Comment color-6</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-7 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 7</h4>
+          </div>
+          <div class="comment color-7 comment-angle-5">
+            <p>Comment color-7</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-8 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 8</h4>
+          </div>
+          <div class="comment color-8 comment-angle-5">
+            <p>Comment color-8</p>
+          </div>
+        </li>
+        <li class="message">
+          <div class="author goog-inline-block gp-113119781435562268682 color-9 author-angle-4">
+            <img src="https://lh6.googleusercontent.com/-0oDy4l-JXTM/AAAAAAAAAAI/AAAAAAAAAAA/lKNO04oEs8Y/photo.jpg?sz=50" width="80" height="80" alt="author photo">
+            <h4>Author color 9</h4>
+          </div>
+          <div class="comment color-9 comment-angle-5">
+            <p>Comment color-9</p>
+          </div>
+        </li>
+      </ol>
+    </div>  
+  </body>
+</html>

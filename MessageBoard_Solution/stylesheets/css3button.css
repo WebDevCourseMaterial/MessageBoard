@@ -10,7 +10,7 @@
 
 /* Imageless button styles. */
 .goog-css3-button {
-  padding: 0 6px;
+  padding: 1px 7px;
   text-align: center;
   vertical-align: middle;
   white-space: nowrap;
@@ -18,7 +18,7 @@
   outline: none;
   font-size: 18px;
   color: #000;
-  border: 2px solid #bbb;
+  border: 2px solid #aaa;
   -webkit-border-radius: 8px;
   -moz-border-radius: 8px;
   /* TODO(eae): Change this to -webkit-linear-gradient once

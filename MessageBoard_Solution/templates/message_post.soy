@@ -11,10 +11,10 @@
  */
 {template .postOverlay}
   <div class="{css post-backdrop}">
-    <div class="{css post-controls}">
+    <div class="{css img-wrapper}">
       <img src="{$userThumbnail}" width="50" height="50" alt="author photo">
-      <input value="" label="make a new post here" id="post-input" x-webkit-speech>
     </div>
+    <input label="make a new post here" id="post-input" x-webkit-speech>
   </div>
 {/template}
 
@@ -23,7 +23,7 @@
  */     
 {template .postOverlayNotSignedIn}
   <div class="{css post-backdrop}">
-    <div class="{css post-controls}">
+    <div class="{css auth-button-wrapper}">
       <div class="{css auth-button}">Sign in to post</div>
     </div>
   </div>

@@ -88,8 +88,8 @@ messageboard.MessageViewerController.prototype.logger =
  */
 messageboard.MessageViewerController.prototype.updateMessages = function() {
   goog.net.XhrIo.send(
-      //'http://www.rose-message-board.com/api?limit=12', // Full path.
-      '/api?limit=10',
+      'http://rose-message-board.appspot.com/api?limit=10', // Full path.
+      //'/api?limit=10',
       goog.bind(this.handleMessagesResponse_, this));
 };
 
