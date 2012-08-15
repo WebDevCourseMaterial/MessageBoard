@@ -11,7 +11,7 @@ goog.provide('messageboard.Message');
 goog.provide('messageboard.MessageViewerStorage');
 
 goog.require('goog.array');
-
+goog.require('goog.json');
 
 
 /**
@@ -21,6 +21,7 @@ goog.require('goog.array');
  */
 messageboard.MessageViewerStorage = function() {};
 goog.addSingletonGetter(messageboard.MessageViewerStorage);
+
 
 /**
  * Individual message from the backend.  Note this typedef is for documentation.
@@ -32,9 +33,11 @@ goog.addSingletonGetter(messageboard.MessageViewerStorage);
  */
 messageboard.Message;
 
+
 /**
  * Display name when no author name is found.
  * @type {string}
+ * @const
  */
 messageboard.MessageViewerStorage.UNKNOWN_NAME = 'Unknown';
 
@@ -42,8 +45,18 @@ messageboard.MessageViewerStorage.UNKNOWN_NAME = 'Unknown';
 /**
  * Link to the image that should be used if no image is found for author.
  * @type {string}
+ * @const
  */
 messageboard.MessageViewerStorage.UNKNOWN_PHOTO = 'images/no_photo_gitcat.png';
+
+
+/**
+ * Key used in localStorage to keep the most recent message response with
+ * offset=0.  This could be used to get content on the screen before a response.
+ * @type {string}
+ * @const
+ */
+messageboard.MessageViewerStorage.MESSAGES_KEY = 'messages-key';
 
 
 /**
@@ -71,9 +84,15 @@ messageboard.MessageViewerStorage.prototype.addKnownAuthorMetadata =
     }
     // Select colors to use so that this author is always the same color pair.
     var gPlusLen = message['google_plus_id'].length;
-    message['author_color'] = message['google_plus_id'].substring(3, 4);
-    message['comment_color'] = message['google_plus_id']
-        .substring(gPlusLen-1, gPlusLen);    
+    if (gPlusLen > 4) {
+      message['author_color'] = message['google_plus_id'].substring(3, 4);
+      message['comment_color'] = message['google_plus_id']
+          .substring(gPlusLen-1, gPlusLen);      
+    } else {
+      // Message with an invalid Google+ id;
+      message['author_color'] = 0;
+      message['comment_color'] = 1;
+    }    
   }, this));
   return unknownIds;
 };
@@ -97,7 +116,11 @@ messageboard.MessageViewerStorage.prototype.addStoredGooglePlusInfo_ =
   var gPlusId = message['google_plus_id']; 
   var localStorageResult = goog.global.localStorage.getItem(gPlusId);
   if (localStorageResult) {
-    var gPlusInfo = goog.json.parse(localStorageResult);
+    try {
+      var gPlusInfo = goog.json.parse(localStorageResult);
+    } catch (e) {
+      return false;
+    }
     if (gPlusInfo.hasOwnProperty('display_name') &&
         gPlusInfo.hasOwnProperty('image_url')) {
       message['display_name'] = gPlusInfo['display_name'];
@@ -136,7 +159,7 @@ messageboard.MessageViewerStorage.prototype.storeMessages =
     function(messages) {
   var messagesJson = goog.json.serialize(messages);
   goog.global.localStorage.setItem(
-      messageboard.MessageViewerStorage.MESSAGES,
+      messageboard.MessageViewerStorage.MESSAGES_KEY,
       messagesJson);
 };
 
@@ -151,9 +174,10 @@ messageboard.MessageViewerStorage.prototype.getMessages =
     function() {
   var messages = [];
   var jsonMessagesInStorage = goog.global.localStorage.getItem(
-      messageboard.MessageViewerStorage.MESSAGES);
+      messageboard.MessageViewerStorage.MESSAGES_KEY);
   if (jsonMessagesInStorage) {
-    messages = goog.json.parse(jsonMessagesInStorage);
+    messages = /** @type {Array.<messageboard.Message>} */
+        (goog.json.parse(jsonMessagesInStorage));
   }
   return messages;
 };

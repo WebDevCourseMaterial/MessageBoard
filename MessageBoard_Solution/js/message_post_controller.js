@@ -245,10 +245,6 @@ messageboard.MessagePostController.prototype.handleXhrResponse_ = function(e) {
         messageResponse['error']);
     return;
   }
-  this.logger.info('Status = ' + messageResponse['status']);
-  this.logger.info('Message comment added was = ' +
-      messageResponse['message']['comment']);
-  
   // Fire an event that a new message has been successfully added.
   this.dispatchEvent(
       messageboard.MessagePostController.EventType.NEW_MESSAGE_POSTED);

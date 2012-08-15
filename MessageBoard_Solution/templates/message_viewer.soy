@@ -11,7 +11,24 @@
  * @param messages A list of messages to display.
  */
 {template .messagesList}
-<ol>
+<ol id="message-list">
+  {if $messages.length}
+    {call .messages data="all" /}
+  {else}
+    <div class="{css no-messages}">
+       <h1>No messages found</h1>
+       <h2><em>Maybe you should write the first message!</em></h2>
+    </div>
+  {/if}
+</ol>
+{/template}
+
+
+/**
+ * Returns a fragment of message list items.
+ * @param messages A list of messages to display.
+ */
+{template .messages}
   {foreach $message in $messages}
     {call .messageListItem}
       {param google_plus_id: $message['google_plus_id'] /}
@@ -21,13 +38,7 @@
       {param comment_color: $message['comment_color'] /}
       {param author_color: $message['author_color'] /}
     {/call}
-  {ifempty}
-    <div class="{css no-messages}">
-      <h1>No messages found</h1>
-      <h2><em>Maybe you should write the first message!</em></h2>
-    </div>
   {/foreach}
-</ol>
 {/template}
 
 

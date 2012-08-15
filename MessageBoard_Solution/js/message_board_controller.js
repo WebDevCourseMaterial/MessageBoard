@@ -99,7 +99,7 @@ messageboard.MessageBoardController.prototype.init_ = function() {
   this.eventHandler_.listen(this.messagePostController_,
       messageboard.MessagePostController.EventType.NEW_MESSAGE_POSTED,
       function(e) {
-        this.messageViewController_.updateMessages();
+        this.messageViewController_.fetchMessages(0);
       });
 };
 

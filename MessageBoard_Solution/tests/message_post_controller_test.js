@@ -109,5 +109,6 @@ function testHandleXhrResponse() {
   eventHandler.listen(messagePostController,
       messageboard.MessagePostController.EventType.NEW_MESSAGE_POSTED,
       eventCallback);
-  messagePostController.handleXhrResponse_({target: mockXhr});  
+  messagePostController.handleXhrResponse_({target: mockXhr});
+  mockControl.$verifyAll();
 }

@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Message Board</title>
+    <link rel="stylesheet" type="text/css" href="stylesheets/common.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/css3button.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/message_post.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/message_viewer.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/colors_and_angles.css">
+    <link rel="stylesheet" type="text/css" href="stylesheets/message_board.css">
+    <script type="text/javascript" src="../../../closure/closure-library/closure/goog/base.js"></script>
+    <script type="text/javascript" src="build/deps.js"></script>
+    <script type="text/javascript">
+      goog.require('goog.debug.Console');
+      goog.require('goog.debug.Logger');
+      goog.require('goog.debug.LogManager');
+      goog.require('goog.dom');
+      goog.require('goog.events');
+      goog.require('messageboard.MessageBoardController');
+    </script>
+  </head>
+  <body>
+    <div id="message-board"></div>  
+    <script type="text/javascript">
+      goog.debug.LogManager.getRoot().setLevel(goog.debug.Logger.Level.INFO);
+      var logconsole = new goog.debug.Console();
+      logconsole.setCapturing(true);
+    
+      new messageboard.MessageBoardController(/** @type {!Element} */ (
+          goog.dom.getElement('message-board')));  
+    </script>
+  </body>
+</html>

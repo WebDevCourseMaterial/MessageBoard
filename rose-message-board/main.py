@@ -31,7 +31,7 @@ class MainHandler(webapp2.RequestHandler):
 		self.response.headers.add_header("Access-Control-Allow-Origin", "*")
 		if self.request.path:
 			try:
-				message_id_request = int(self.request.path)
+				message_id_request = int(self.request.path[4:])
 				existingMessage = Message.get_by_id(message_id_request)
 				response = {'message': existingMessage.to_dict(), 'status': 'success'}
 				self.response.out.write(json.dumps(response, default=self.date_time_handler))
