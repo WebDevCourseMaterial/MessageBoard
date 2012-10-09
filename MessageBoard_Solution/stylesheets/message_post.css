@@ -37,23 +37,17 @@
   -moz-flex: 1;
   flex: 1;
   height: 68px;
-  -webkit-justify-content: center;
-  -ms-justify-content: center;
-  -moz-justify-content: center;
-  justify-content: center;
   max-width: 660px;
-  z-index: 1;  /* Positioned elements with a Z-level form a stacking context */
-  /* Link about painting https://developer.mozilla.org/en-US/docs/CSS/Understanding_z-index/The_stacking_context */
+  z-index: 1;
 }
 
 .img-wrapper {
-	position: relative;
 	width: 100px;
   -webkit-flex: none;
   -ms-flex: none;
   -moz-flex: none;
   flex: none;
-    display: -webkit-flex;
+  display: -webkit-flex;
   display: -moz-flex;
   display: flex;
   -webkit-justify-content: center;
